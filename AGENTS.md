@@ -32,6 +32,9 @@
 - `js/combat.js` 飞行弹丸、投掷物与烟/闪、配件外观、红区、罗盘、地图标记（在 game.js 之后加载，覆盖 fireBullet/throwNade）
 - `js/vehicle.js` 吉普与小艇：模型、驾驶、碰撞、上下车
 - `js/ladder.js` 铁梯攀爬：`MAP.ladders` 登记、玩家 W/S 攀爬、Bot 把屋面当楼层（包装 moveEntity/animSoldier/updatePlayer/updateHUD）
+- `js/doors.js` 自动门：towns.js 在换皮模式把门板登记进 `MAP.doors`（不再烘焙静态门板），三组 InstancedMesh（门板/门芯/把手），玩家或 Bot 2.3 m 内自动打开约 105°，离开后关上；纯视觉，门洞不挡路
+- `js/handy.js` 便利层：地面物品浮动名牌（类别色 + 名称 + 数量/耐久 + 对你是否有用，视线检测）、自动拾取明显有用的东西（玩家刚丢的不捡）、H 快速治疗、设置里「自动拾取」开关
+- `js/endcard.js` 结算/阵亡卡：名次奖章、六格数据、本局称号、渔获记录、身上装备；× 或 Esc 收起成角落小条；包装 hurt/healStart 统计伤害、爆头、吃药
 - `js/brain.js` Bot 跨局记忆（localStorage `inkisland_brain`）：包装 playerFire/hurt/botPlanDrop/startMatch/endMatch/updateHUD，最后加载
 - `js/replay.js` 死亡回放（环形缓冲 + 包装 frame/updateHUD/startMatch）与远处枪声闷响（包装 SFX.shot）
 - `js/finale.js` 结算动作与战绩走势图（最后加载，包装 endMatch/updateCamera/startMatch）
@@ -59,6 +62,9 @@
 - 暂不做：`sim.step(state, inputs)` 纯函数化（无联机计划时成本过高）、平台能力层（无小程序发布计划）。有计划时先做这两条再加功能。
 
 ## 沉淀的教训
+- 2026-10-07 对局进行中的状态是 `G.state === 'live'`（不是 'play'）：handy.js 第一版写成 'play'，自动拾取和快速治疗全部静默失效，探针才查出来。
+- 2026-10-07 中文字体只用 `vendor/fonts` 里的子集（霞鹜文楷粗 + 马善政，OFL）：新增中文文案后跑 `python3 tools/subset-fonts.py` 重新子集化，否则新字回落到系统字体。描边/阴影一律用 em 单位，小按钮上 px 描边会把毛笔字糊掉。
+- 2026-10-07 物品「值不值得捡」只有一个判断 `lootUse(e, it)`（loot.js），必须和 invTake 的拒绝条件一一对应；护甲耐久跟着地上的背心走（`it.dur`），换甲只比耐久。
 - 2026-10-07 道路沙带要在 `buildTowns` 之后画：先画会让路面从房子木地板里穿出来（d17 修，占地内顶点下沉 0.6 m）。截图探针瞬移相机后必须 `MAP.lod(x, z)`，否则细节区块没显示，会误判成穿模。
 - 2026-10-07 换枪（槽位已有枪）时 `invTake` 要同时 `delete e.ammo[had]`；smoke 不覆盖玩家换枪，`[INV]` 警告只在探针里冒出来。
 - 2026-10-05 导航格必须 1 m：墙 0.3 m 厚、门 1.4 m 宽，2 m 格会让 A* 穿墙或把整栋房子判成不可达。长距离用 6 m 粗网格路由 + 短段细 A*，并限制每帧细 A* 次数。

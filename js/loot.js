@@ -40,6 +40,23 @@ function lootClear() { LOOT.items.length = 0; lgClearAll(); }
 function lootHide(it) { it.alive = false; lgMark(it); }
 function lootSpawn(k, x, y, z, qty) { const item = { k, x, y, z, alive: true, qty: qty || ITEMS[k].qty || 1, yaw: rand(6.28) }; LOOT.items.push(item); lgMark(item); if (LOOT.items.length > 2400) LOOT.items = LOOT.items.filter(i => i.alive); return item; }
 function lootNearList(e, radius = 2.6) { const out = []; for (const it of LOOT.items) { if (!it.alive || it.inCrate) continue; const d = Math.hypot(it.x - e.pos.x, it.z - e.pos.z); if (d < radius && Math.abs(it.y - e.pos.y) < 1.6) out.push([d, it]); } out.sort((a, b) => a[0] - b[0]); return out.map(o => o[1]); }
+/* d18: what an item is (sticker colour + one-character glyph) and whether this entity should take it; lootUse mirrors every refusal in invTake */
+const LOOT_CAT = k => { const K = (ITEMS[k] || {}).kind; return K === 'gun' ? ['gun', '#ff8a3d', '枪'] : K === 'ammo' ? ['ammo', '#f2b33d', '弹'] : K === 'med' ? ['med', '#33b877', '药'] : K === 'nade' ? ['nade', '#ff5a6e', '投'] : K === 'scope' || K === 'att' ? ['mod', '#9b6ef0', '配'] : ['gear', '#3f8fe0', '装']; };
+const MED_AUTO = { band: 10, kit: 3, medkit: 2, pill: 3, drink: 3, adren: 2 };
+function lootUse(e, it) { const d = ITEMS[it.k]; if (!d || !e.inv) return { ok: false, tag: '' }; const fits = w => invLoad(e) + w <= BAG_CAP(e.bagLv) + .01, nm = k => ITEMS[k] ? ITEMS[k].name : k;
+  if (d.kind === 'gun') { const sl = WEAPONS[it.k].slot, had = e.inv[sl]; return had === it.k ? { ok: false, tag: '已有' } : !had ? { ok: true, auto: true, up: true, tag: '空槽' } : { ok: true, tag: '换掉 ' + nm(had) }; }
+  if (d.kind === 'ammo') { const mine = [1, 2].some(q => e.inv[q] && AMMO[e.inv[q]] === d.t), f = fits(it.qty / 30); return { ok: f, auto: f && mine, up: mine && f, tag: !f ? '装不下' : mine ? '能用' : '' }; }
+  if (d.kind === 'med') { const f = fits(d.w); return { ok: f, auto: f && (e.meds[it.k] || 0) < (MED_AUTO[it.k] || 2), tag: f ? '' : '装不下' }; }
+  if (d.kind === 'nade') { const n = e.nades[it.k] || 0, f = n < 3 && fits(1); return { ok: f, auto: f && n < 2, tag: n >= 3 ? '满了' : f ? '' : '装不下' }; }
+  if (d.kind === 'vest') { const dur = it.dur ?? d.ap, ok = !e.vestLv || dur > e.armor + .5; return { ok, auto: ok, up: ok, tag: !e.vestLv ? '可穿' : ok ? `更耐打 ${Math.ceil(dur)} > ${Math.ceil(e.armor)}` : '不如身上的' }; }
+  if (d.kind === 'helm') { const ok = d.lv > e.helmLv; return { ok, auto: ok, up: ok, tag: ok ? (e.helmLv ? '更好' : '可戴') : '不如身上的' }; }
+  if (d.kind === 'bag') { const ok = d.lv > e.bagLv; return { ok, auto: ok, up: ok, tag: ok ? (e.bagLv ? '更大' : '可背') : '不如身上的' }; }
+  if (d.kind === 'scope') { const ok = !e.scope || ITEMS[e.scope].lv < d.lv; return { ok, auto: ok, up: ok, tag: ok ? '更好' : '已有' }; }
+  if (d.kind === 'att') { const ok = !e.att[d.slot]; return { ok, auto: ok, up: ok, tag: ok ? '可装' : '已有' }; }
+  if (d.kind === 'suit') { const ok = !e.ghillie; return { ok, auto: ok, up: ok, tag: ok ? '可穿' : '已有' }; }
+  return { ok: false, tag: '' }; }
+/* nearby items with the takeable ones first (each group still nearest first): F and the pickup list both read this */
+function lootNearSorted(e, r) { const L = lootNearList(e, r), u = new Map(L.map(i => [i, lootUse(e, i)])); return L.filter(i => u.get(i).up).concat(L.filter(i => u.get(i).ok && !u.get(i).up), L.filter(i => !u.get(i).ok)); }
 const lootPick = () => { let tot = 0; for (const [, w] of LOOT_TABLE) tot += w; let r = Math.random() * tot; for (const [k, w] of LOOT_TABLE) { r -= w; if (r <= 0) return k; } return 'band'; };
 /* fill every recorded spot with 1–3 items; towns get the spots in towns.js */
 function lootPopulate() { lootClear(); for (const s of LOOT.spots) { const n = Math.random() < .25 ? 0 : 1 + (Math.random() < .5 ? 1 : 0) + (Math.random() < .25 ? 1 : 0); for (let i = 0; i < n; i++) { const a = rand(6.28), r = rand(.2, .8); lootSpawn(lootPick(), s.x + Math.cos(a) * r, s.y, s.z + Math.sin(a) * r); } } }
@@ -62,7 +79,7 @@ function invTake(e, it) {
   if (d.kind === 'gun') { const slot = WEAPONS[it.k].slot, had = e.inv[slot]; if (had === it.k) return false; if (had) { lootDrop(e, had, it.x, it.z, it.y); delete e.ammo[had]; } invGive(e, it.k); if (isPl) { lootHide(it); switchTo(it.k); invCheck(e, 'take'); return `拾取 ${d.name}`; } else setEntWeapon(e, it.k); lootHide(it); invCheck(e, 'take'); return d.name; }
   if (d.kind === 'ammo') { if (invLoad(e) + it.qty / 30 > BAG_CAP(e.bagLv) + .01) return false; e.pool[d.t] = (e.pool[d.t] || 0) + it.qty; lootHide(it); return `${d.name} ×${it.qty}`; }
   if (d.kind === 'med') { if (invLoad(e) + d.w > BAG_CAP(e.bagLv) + .01) return false; e.meds[it.k]++; lootHide(it); return d.name; }
-  if (d.kind === 'vest') { if (e.vestLv >= d.lv && e.armor > d.ap * .5) return false; if (e.vestLv) lootDrop(e, 'vest' + e.vestLv, it.x, it.z, it.y); e.vestLv = d.lv; e.armor = d.ap; lootHide(it); return d.name; }
+  if (d.kind === 'vest') { const dur = it.dur ?? d.ap; if (e.vestLv && dur <= e.armor + .5) return false; if (e.vestLv && e.armor > 0) lootDrop(e, 'vest' + e.vestLv, it.x, it.z, it.y).dur = e.armor; e.vestLv = d.lv; e.armor = dur; lootHide(it); return d.name; }
   if (d.kind === 'helm') { if (e.helmLv >= d.lv) return false; if (e.helmLv) lootDrop(e, 'helm' + e.helmLv, it.x, it.z, it.y); e.helmLv = d.lv; e.helmet = true; lootHide(it); return d.name; }
   if (d.kind === 'bag') { if (e.bagLv >= d.lv) return false; if (e.bagLv) lootDrop(e, 'bag' + e.bagLv, it.x, it.z, it.y); e.bagLv = d.lv; lootHide(it); return d.name; }
   if (d.kind === 'suit') { if (e.ghillie) return false; e.ghillie = true; ghillieWear(e); lootHide(it); return d.name; }
@@ -73,7 +90,7 @@ function invTake(e, it) {
 }
 function lootDrop(e, k, x, z, y) { const a = rand(6.28); let px = x + Math.cos(a) * .5, pz = z + Math.sin(a) * .5; if (y === undefined && MAP.reach && !MAP.reach[navIdx(px, pz)]) { const p = navPos(navSnap(px, pz)); if (Math.hypot(p.x - px, p.z - pz) < 6) { px = p.x; pz = p.z; } } return lootSpawn(k, px, y !== undefined ? y : MAP.floorAt(px, pz), pz); }
 /* everything the dead carried, scattered around the body */
-function lootDropAll(e) { const x = e.pos.x, z = e.pos.z, y = MAP.floorAt(x, z); for (const s of [1, 2]) if (e.inv[s]) { lootDrop(e, e.inv[s], x, z, y); } for (const t in e.pool) if (e.pool[t] >= 5) { const k = 'a' + t; lootDrop(e, k, x, z, y).qty = e.pool[t]; } for (const k in e.meds) for (let i = 0; i < Math.min(3, e.meds[k]); i++) lootDrop(e, k, x, z, y); if (e.vestLv) lootDrop(e, 'vest' + e.vestLv, x, z, y); if (e.helmLv) lootDrop(e, 'helm' + e.helmLv, x, z, y); if (e.scope) lootDrop(e, e.scope, x, z, y); for (const k in e.nades) for (let i = 0; i < e.nades[k]; i++) lootDrop(e, k, x, z, y); for (const k in e.att) if (e.att[k]) lootDrop(e, k === 'mag' ? 'xmag' : k, x, z, y); }
+function lootDropAll(e) { const x = e.pos.x, z = e.pos.z, y = MAP.floorAt(x, z); for (const s of [1, 2]) if (e.inv[s]) { lootDrop(e, e.inv[s], x, z, y); } for (const t in e.pool) if (e.pool[t] >= 5) { const k = 'a' + t; lootDrop(e, k, x, z, y).qty = e.pool[t]; } for (const k in e.meds) for (let i = 0; i < Math.min(3, e.meds[k]); i++) lootDrop(e, k, x, z, y); if (e.vestLv) lootDrop(e, 'vest' + e.vestLv, x, z, y).dur = e.armor; if (e.helmLv) lootDrop(e, 'helm' + e.helmLv, x, z, y); if (e.scope) lootDrop(e, e.scope, x, z, y); for (const k in e.nades) for (let i = 0; i < e.nades[k]; i++) lootDrop(e, k, x, z, y); for (const k in e.att) if (e.att[k]) lootDrop(e, k === 'mag' ? 'xmag' : k, x, z, y); }
 /* drop one unit of something from the inventory at the feet */
 function invDropN(e, k, n) { const d = ITEMS[k]; if (!d || d.kind !== 'ammo' || !(e.pool[d.t] > 0)) return false; n = Math.min(e.pool[d.t], n); e.pool[d.t] -= n; lootDrop(e, k, e.pos.x, e.pos.z, e.pos.y).qty = n; return true; }
 function invDrop(e, k) { const y = e.pos.y, x = e.pos.x, z = e.pos.z, d = ITEMS[k]; if (!d) return false;
@@ -81,7 +98,7 @@ function invDrop(e, k) { const y = e.pos.y, x = e.pos.x, z = e.pos.z, d = ITEMS[
   if (d.kind === 'ammo') { const n = Math.min(e.pool[d.t] || 0, d.qty); if (!n) return false; e.pool[d.t] -= n; lootDrop(e, k, x, z, y).qty = n; return true; }
   if (d.kind === 'med') { if (!e.meds[k]) return false; e.meds[k]--; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'nade') { if (!e.nades[k]) return false; e.nades[k]--; lootDrop(e, k, x, z, y); return true; }
   if (d.kind === 'att') { if (!e.att[d.slot]) return false; e.att[d.slot] = 0; lootDrop(e, k, x, z, y); if (e.isPlayer) attachVisuals(); return true; } if (d.kind === 'scope') { if (e.scope !== k) return false; e.scope = null; lootDrop(e, k, x, z, y); return true; }
-  if (d.kind === 'vest') { if (!e.vestLv) return false; e.vestLv = 0; e.armor = 0; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'helm') { if (!e.helmLv) return false; e.helmLv = 0; e.helmet = false; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'bag') { if (!e.bagLv) return false; e.bagLv = 0; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'suit') { if (!e.ghillie) return false; e.ghillie = false; ghillieStrip(e); lootDrop(e, k, x, z, y); return true; } return false; }
+  if (d.kind === 'vest') { if (!e.vestLv) return false; const ar = e.armor; e.vestLv = 0; e.armor = 0; lootDrop(e, k, x, z, y).dur = ar; return true; } if (d.kind === 'helm') { if (!e.helmLv) return false; e.helmLv = 0; e.helmet = false; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'bag') { if (!e.bagLv) return false; e.bagLv = 0; lootDrop(e, k, x, z, y); return true; } if (d.kind === 'suit') { if (!e.ghillie) return false; e.ghillie = false; ghillieStrip(e); lootDrop(e, k, x, z, y); return true; } return false; }
 
 /* ---- healing: a timed action, cancelled by damage ---- */
 function healStart(e, k) { const d = ITEMS[k]; if (!e.meds[k] || e.heal || (d.heal && e.hp >= d.cap) || (d.boost && e.boost > 100 - d.boost * .5)) return false; e.heal = { k, t: 0, dur: d.t }; if (e.isPlayer) SFX.click(900, .2); return true; }

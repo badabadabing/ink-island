@@ -23,7 +23,7 @@ function initTouch() {
     else if (k === 'nade') onKey('Digit4');
     else if (k === 'throw') { G.fireEdge = true; G.fire = true; TOUCH.throwN = 4; }
     else if (k === 'mode') onKey('KeyB');
-    else if (k === 'band') { if (pl && pl.alive) healStart(pl, pl.meds.kit > 0 && pl.hp < 60 ? 'kit' : 'band'); }
+    else if (k === 'band') { if (pl && pl.alive) { if (typeof quickHeal === 'function') quickHeal(); else healStart(pl, pl.meds.kit > 0 && pl.hp < 60 ? 'kit' : 'band'); } }
     else if (k === 'pill') { if (pl && pl.alive) healStart(pl, pl.meds.drink > 0 ? 'drink' : 'pill'); }
     else if (k === 'map') toggleMap();
     else if (k === 'bag') toggleInv();

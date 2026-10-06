@@ -255,6 +255,41 @@ body.skin #start.cta:hover::after{animation:fishwag .35s ease-in-out infinite al
 @keyframes fishwag{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
 body.skin .lastLine{font-weight:700;color:var(--teal);min-height:1.4em;transition:opacity .4s}
 body.skin #loading{background:#9fd3ec;color:var(--ink);font-weight:900}
+/* d18: overlays never clip in short or narrow windows (scroll inside the overlay, panel centred when it fits); help and settings sit above pause */
+.ov.on{overflow-y:auto;overscroll-behavior:contain;align-items:flex-start;padding:22px 12px}
+.ov.on>.panel{margin:auto;flex-shrink:0;max-width:calc(100vw - 24px)}
+#keys,#end{z-index:9}
+#keys .panel.keysP{max-width:calc(100vw - 24px)}
+@media (max-height:620px){.ov .panel{padding-bottom:18px}body.skin .ov .panel,body.skin #menu .panel.menuP{padding-top:46px !important}.ov h2{font-size:24px;margin-bottom:6px}#menu .panel.menuP{max-height:none}}
+/* d18 type: hand-painted harbour-sign lettering (Ma Shan Zheng) for titles, primary buttons and banners, warm handwritten LXGW WenKai Bold for all other text; numbers stay rounded heavy */
+body.skin{font-family:"LXGW WenKai","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;font-weight:700;-webkit-font-smoothing:antialiased}
+body.skin button,body.skin input,body.skin select,body.skin .ltag{font-family:inherit}
+body.skin .ov h2,body.skin .invP h2,body.skin #endT,body.skin #deadT,body.skin #bannerT,body.skin #menu .sub,body.skin button.pri,body.skin #start.cta,body.skin .sign{font-family:"Ma Shan Zheng","LXGW WenKai","PingFang SC",serif;font-weight:400}
+body.skin .ov h2,body.skin .invP h2{font-size:42px;line-height:1.15;letter-spacing:8px;color:var(--sun);-webkit-text-stroke:.19em var(--ink);paint-order:stroke fill;text-shadow:0 .12em 0 var(--ink);margin-bottom:12px}
+body.skin #endT,body.skin #deadT{font-size:40px;letter-spacing:3px;color:var(--red);white-space:normal;-webkit-text-stroke:.2em var(--ink);paint-order:stroke fill;text-shadow:0 .12em 0 var(--ink)}
+body.skin button.pri,body.skin #start.cta{font-size:26px;letter-spacing:4px;color:#fff;-webkit-text-stroke:.22em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
+body.skin #pause button.pri,body.skin .ov .btns button.pri{font-size:24px;line-height:1.2}
+body.skin #start.cta{font-size:34px;padding:12px 28px 16px}
+body.skin #menu .sub{font-size:26px;letter-spacing:10px;padding:2px 18px 4px;color:var(--ink)}
+body.skin #banner #bannerT{paint-order:stroke fill}
+body.skin #menu h3,body.skin .ov h3{font-size:15px;letter-spacing:5px;color:var(--teal);font-weight:700}
+body.skin .cardRow button b{font-size:21px;letter-spacing:2px} body.skin .cardRow button small{font-size:13px;font-weight:700;opacity:.8}
+body.skin .ov p,body.skin #menu .tag,body.skin #menu p{font-weight:700}
+body.skin button{font-weight:700;letter-spacing:2px}
+body.skin #help,body.skin #weaponState,body.skin #pickup,body.skin #feed{font-weight:700}
+body.skin #endS{display:none} body.skin #endPose{font-size:13px;letter-spacing:3px;color:var(--teal);margin:2px 0 10px}
+/* d18 review fixes: brush lettering keeps a thin outline (visible edge about 5% of the size) so strokes never clump; menu copy darker and larger; HUD steps back behind pause / help */
+body.skin .ov h2,body.skin .invP h2{-webkit-text-stroke:.11em var(--ink);text-shadow:0 .08em 0 var(--ink)}
+body.skin #endT,body.skin #deadT{font-size:clamp(24px,3.2vw,32px);line-height:1.15;text-wrap:balance;-webkit-text-stroke:.11em var(--ink);text-shadow:0 .08em 0 var(--ink)}
+body.skin button.pri,body.skin #start.cta{-webkit-text-stroke:.12em var(--ink);text-shadow:0 .08em 0 var(--ink)}
+body.skin #banner #bannerT{font-size:34px;font-weight:400;letter-spacing:.06em;color:#fff6e6;-webkit-text-stroke:.1em var(--ink);text-shadow:0 3px 0 var(--ink)}
+body.skin #endPose{font-size:14px;color:#3a8f88;letter-spacing:.08em}
+body.skin #menu .tag{font-size:13px;color:#4a5470;letter-spacing:.04em;opacity:1}
+body.skin #lastLine{font-size:14px;color:#2a8a82;letter-spacing:.02em}
+body.skin #menu h3{font-size:14px}
+body.skin .cardRow button small{display:block;font-size:12px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.skin #end .btns,body.skin #dead .btns{padding:12px 0 14px;margin-bottom:0;box-shadow:0 -10px 12px -6px var(--paper);z-index:1}
+body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opacity:.35}
 </style>
 </head>
 <body>
@@ -310,14 +345,14 @@ body.skin #loading{background:#9fd3ec;color:var(--ink);font-weight:900}
 <div id="keys" class="ov"><div class="panel keysP"><h2>操 作</h2><div class="keysCols">
   <div><h3>移动</h3><p>WASD 移动 · Shift 冲刺 · X 静步<br>C 按住蹲 · Z 趴下 · 空格 跳 / 攀爬 / 翻窗<br>Q / E 探头 · Alt 自由视角</p></div>
   <div><h3>射击</h3><p>左键 开火 · 右键按住 瞄准（开镜）<br>R 换弹 · B 单发 / 连发 · 1 2 3 切枪<br>4 投掷物 · G 直接投掷</p></div>
-  <div><h3>物资</h3><p>F 拾取 / 上车 / 开箱 / 扶正<br>TAB 背包（可拖拽）· 7 8 9 0 - = 用药<br>空投琥珀烟 · 阵亡者留下箱子</p></div>
+  <div><h3>物资</h3><p>F 拾取 / 上车 / 开箱 / 扶正<br>H 快速治疗（自动挑最合适的药）<br>走过有用的东西会自动捡（设置里可关）<br>TAB 背包（可拖拽）· 7 8 9 0 - = 用药<br>空投琥珀烟 · 阵亡者留下箱子</p></div>
   <div><h3>界面</h3><p>M 全图（左键标记 · 右键清除）<br>ESC 暂停 · 阵亡后可回放最后 8 秒<br>手机：左半屏摇杆 · 右半屏转视角</p></div>
 </div><div class="btns"><button id="keysClose" class="pri">知道了</button></div></div></div>
 <div id="bigmap" class="ov"><div class="panel" style="padding:12px"><canvas id="bigMapC" width="900" height="900" style="display:block;width:min(86vh,86vw);height:min(86vh,86vw)"></canvas><div style="font-size:11px;letter-spacing:2px;margin-top:8px;text-align:center">M 关闭 · 640 × 640 m</div></div></div>
 <div id="inv" class="ov"><div class="panel invP"><div class="invHead"><h2>背 包</h2><div class="invTabs phoneOnly"><button data-tab="g" class="sel">脚下</button><button data-tab="b">背包</button></div></div><div class="invCols3"><section class="invCol" id="colG"><h3>脚 下 <span id="invGN" class="cnt"></span></h3><div id="invG" class="invList"></div></section><section class="invCol" id="colB"><h3>背 包 <span id="invCap" class="cnt"></span></h3><div id="invCapBar"><i></i></div><div id="invBag" class="invList"></div></section><section class="invCol"><h3>身 上</h3><div id="invGear"></div></section></div><p class="invHint">TAB 关闭 · 拖拽：脚下 ⇄ 背包 / 身上 · F 直接拾取最近的 · 点配件可卸下</p></div></div>
 <div id="end" class="ov"><div class="panel"><h2 id="endT">墨尽纸白 · 岛上只剩你</h2><p id="endS"></p><p id="endPose" class="pose"></p><div id="endStats"></div><canvas id="endHist" width="380" height="96"></canvas><div class="btns"><button id="endAgain" class="pri">再来一局</button><button id="endReplay">回放</button><button id="endMenu">回到菜单</button></div></div></div>
 <div id="crate" class="ov"><div class="panel"><h2 id="crateT">箱子</h2><p id="crateT2"></p><div id="crateList" class="invList"></div><div class="btns" style="margin-top:12px"><button id="crateAll" class="pri">全部拿取</button><button id="crateClose">关闭 (F)</button></div></div></div>
-<div id="pause" class="ov"><div class="panel"><h2>暂停</h2><p id="pauseSum"></p><div id="pauseSet"></div><div class="btns"><button id="resume" class="pri">继续</button><button id="pauseKeys">操作说明</button><button id="quit">回到菜单</button></div><p id="quitNote" class="note" hidden>再按一次确认 · 中途退出按失败记录</p></div></div>
+<div id="pause" class="ov"><div class="panel"><h2>暂停</h2><p id="pauseSum"></p><div id="pauseSet"></div><div class="btns"><button id="resume" class="pri">接着玩</button><button id="pauseKeys">操作说明</button><button id="quit">回到菜单</button></div><p id="quitNote" class="note" hidden>再按一次确认 · 中途退出按失败记录</p></div></div>
 <div id="dead" class="ov"><div class="panel"><h2 id="deadT">你被淘汰了</h2><p id="deadBy"></p><div id="deadStats"></div><div class="btns"><button id="again" class="pri">再来一局</button><button id="deadReplay">回放</button><button id="deadWatch">看完这局</button></div></div></div>
 
 <div id="touch">
@@ -338,7 +373,7 @@ import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
-const files = ['core', 'skin', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'gunskin', 'lootgeo', 'actors', 'islander', 'fx', 'br', 'game', 'combat', 'vehicle', 'ladder', 'crate', 'touch', 'replay', 'brain', 'endgame', 'fxskin', 'finale', 'names'];
+const files = ['core', 'skin', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'gunskin', 'lootgeo', 'actors', 'islander', 'fx', 'br', 'game', 'combat', 'vehicle', 'ladder', 'doors', 'crate', 'touch', 'replay', 'brain', 'endgame', 'fxskin', 'finale', 'names', 'handy', 'endcard'];
 for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
