@@ -1,0 +1,52 @@
+'use strict';
+/* ============ INK ISLAND · zone: the blue wash that closes in, the white ring it closes to, supply drops ============ */
+/* phases: wait before shrinking, shrink duration, radius ratio of the next ring, damage per second outside */
+const ZONE_PH = [{ w: 130, s: 80, r: .55, d: .4 }, { w: 70, s: 60, r: .55, d: .7 }, { w: 55, s: 45, r: .5, d: 1.2 }, { w: 45, s: 35, r: .5, d: 2 }, { w: 35, s: 30, r: .45, d: 3.2 }, { w: 30, s: 20, r: .4, d: 5 }, { w: 25, s: 15, r: 0, d: 7 }];
+const ZONE = { on: false, ph: 0, stage: 'wait', t: 0, blue: { x: 0, z: 0, r: 250 }, white: { x: 0, z: 0, r: 140 }, from: null, wall: null, ring: null, whiteRing: null, dropT: 0, drops: [], dmgTick: 0 };
+const AIRDROP_EVERY = 150;
+
+function zoneInit() {
+  if (ZONE.wall) return;
+  // the wall: an open cylinder of blue wash with vertical ink strokes, scaled to the live radius every frame
+  const cyl = new THREE.CylinderGeometry(1, 1, 320, 72, 1, true); cyl.translate(0, 160, 0);
+  const mat = new THREE.ShaderMaterial({ uniforms: { uC: { value: new THREE.Color(BLUE) }, uT: { value: 0 } }, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    vertexShader: 'varying vec2 vUv; varying float vY; void main(){ vUv=uv; vY=position.y; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 uC; uniform float uT; varying vec2 vUv; varying float vY; void main(){ float k=fract(vUv.x*180.0+sin(vY*.08+uT*.6)*.03); float stroke=smoothstep(.0,.08,k)*smoothstep(.22,.14,k); float fade=exp(-vY*.012); float a=(.10+stroke*.32)*fade; gl_FragColor=vec4(uC,a); }' });
+  ZONE.wall = new THREE.Mesh(cyl, mat); ZONE.wall.frustumCulled = false; ZONE.wall.renderOrder = 3; scene.add(ZONE.wall);
+  const mk = (color, w) => { const g = new LineSegmentsGeometry(); g.setPositions(new Float32Array(96 * 6)); const l = new LineSegments2(g, lineMat({ width: w, color, fog: false })); l.frustumCulled = false; scene.add(l); return l; };
+  ZONE.ring = mk(BLUE, 2.2); ZONE.whiteRing = mk(0xf5f2ea, 2.6); ZONE.whiteInk = mk(INK, 1.1);
+}
+function ringPositions(c, out, lift = .25) { const n = 96; for (let i = 0; i < n; i++) { const a0 = i / n * 6.2832, a1 = (i + 1) / n * 6.2832, x0 = c.x + Math.cos(a0) * c.r, z0 = c.z + Math.sin(a0) * c.r, x1 = c.x + Math.cos(a1) * c.r, z1 = c.z + Math.sin(a1) * c.r; out.set([x0, Math.max(MAP.terrainY(x0, z0), MAP.sea) + lift, z0, x1, Math.max(MAP.terrainY(x1, z1), MAP.sea) + lift, z1], i * 6); } return out; }
+const _ringBuf = new Float32Array(96 * 6);
+function ringUpdate(l, c, lift) { l.geometry.setPositions(ringPositions(c, _ringBuf, lift)); }
+function landPointIn(cx, cz, R) { for (let i = 0; i < 80; i++) { const a = rand(6.2832), d = Math.sqrt(Math.random()) * R, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d; if (MAP.terrainY(x, z) > 1 && Math.hypot(x, z) < MAP.size * .42) return { x, z }; } return { x: cx, z: cz }; }
+function zoneStart() { zoneInit(); const c = landPointIn(0, 0, MAP.size * .15), R0 = MAP.size / 2 + 15; ZONE.blue = { x: 0, z: 0, r: R0 }; ZONE.white = { x: c.x, z: c.z, r: R0 * ZONE_PH[0].r }; ZONE.ph = 0; ZONE.stage = 'wait'; ZONE.t = 0; ZONE.on = true; ZONE.dropT = AIRDROP_EVERY * .6; ZONE.dmgTick = 0;
+  for (const d of ZONE.drops) { scene.remove(d.g); if (d.chute) scene.remove(d.chute); } ZONE.drops = []; ringUpdate(ZONE.ring, ZONE.blue, .3); ringUpdate(ZONE.whiteRing, ZONE.white, .22); ringUpdate(ZONE.whiteInk, ZONE.white, .26); ZONE.wall.visible = ZONE.ring.visible = ZONE.whiteRing.visible = ZONE.whiteInk.visible = true; }
+function zoneStop() { ZONE.on = false; if (ZONE.wall) { ZONE.wall.visible = ZONE.ring.visible = ZONE.whiteRing.visible = ZONE.whiteInk.visible = false; } }
+function nextWhite() { const w = ZONE.white, P = ZONE_PH[ZONE.ph]; if (!P || P.r === 0) return { x: w.x, z: w.z, r: 0 }; const nr = w.r * P.r, p = landPointIn(w.x, w.z, (w.r - nr) * .85); return { x: p.x, z: p.z, r: nr }; }
+const outsideZone = e => Math.hypot(e.pos.x - ZONE.blue.x, e.pos.z - ZONE.blue.z) > ZONE.blue.r;
+const insideWhite = (x, z, margin = 0) => Math.hypot(x - ZONE.white.x, z - ZONE.white.z) < ZONE.white.r - margin;
+
+function zoneUpdate(dt) {
+  if (!ZONE.on) return; const P = ZONE_PH[ZONE.ph]; ZONE.t += dt; ZONE.wall.material.uniforms.uT.value = G.now;
+  if (ZONE.stage === 'wait' && ZONE.t >= P.w) { ZONE.stage = 'shrink'; ZONE.t = 0; ZONE.from = { ...ZONE.blue }; if (G.player.alive) { banner('蓝圈收缩', `第 ${ZONE.ph + 1} 阶段`, 'lose'); setTimeout(() => $('banner').classList.remove('on'), 1800); } SFX.beep(null, false); SFX.beep(null, true); }
+  else if (ZONE.stage === 'shrink') { const k = Math.min(1, ZONE.t / P.s), e = k * k * (3 - 2 * k), f = ZONE.from, w = ZONE.white; ZONE.blue = { x: f.x + (w.x - f.x) * e, z: f.z + (w.z - f.z) * e, r: f.r + (w.r - f.r) * e }; if (G.now - (ZONE.ringT || 0) > .15) { ZONE.ringT = G.now; ringUpdate(ZONE.ring, ZONE.blue, .3); }
+    if (k >= 1) { ZONE.ph++; if (ZONE.ph >= ZONE_PH.length) { ZONE.stage = 'done'; } else { ZONE.white = nextWhite(); ZONE.stage = 'wait'; ZONE.t = 0; ringUpdate(ZONE.whiteRing, ZONE.white, .22); ringUpdate(ZONE.whiteInk, ZONE.white, .26); } } }
+  ZONE.wall.position.set(ZONE.blue.x, MAP.sea - 2, ZONE.blue.z); ZONE.wall.scale.set(ZONE.blue.r, 1, ZONE.blue.r); ZONE.whiteRing.visible = ZONE.whiteInk.visible = ZONE.white.r > 0 && ZONE.stage !== 'done';
+  // damage ticks twice a second for everyone outside; the player's screen turns blue at the edges
+  ZONE.dmgTick += dt; if (ZONE.dmgTick >= .5) { ZONE.dmgTick -= .5; const dps = ZONE.stage === 'done' ? 7 : P.d; for (const e of G.ents) if (e.alive && !e.air && outsideZone(e)) { e.hp -= dps * .5; healCancel(e); if (e.isPlayer) { G.zoneHurtT = .6; } if (e.hp <= 0) kill(e, null, null, false, null); } }
+  if (G.zoneHurtT > 0) G.zoneHurtT -= dt;
+  // supply drops
+  ZONE.dropT -= dt; if (ZONE.dropT <= 0 && ZONE.stage !== 'done' && ZONE.white.r > 20) { ZONE.dropT = AIRDROP_EVERY; airdrop(); }
+  for (let i = ZONE.drops.length - 1; i >= 0; i--) { const d = ZONE.drops[i]; d.t += dt; if (d.falling) { d.y -= 7 * dt; d.g.position.y = d.y; d.g.rotation.y += dt * .3; if (d.chute) { d.chute.position.set(d.x, d.y + .9, d.z); d.chute.rotation.y += dt * .3; } if (d.y <= d.gy) { d.falling = false; d.y = d.gy; d.g.position.y = d.y; if (d.chute) { scene.remove(d.chute); d.chute = null; } SFX.land(d.g.position); FX.burst(d.x, d.y + .5, d.z, 0, 1, 0, 24, INK, 3, .03); for (const k of ['vest3', 'helm3', Math.random() < .5 ? 'awp' : 'bow', Math.random() < .5 ? 'a300' : 'abolt', 'a300', 'kit', 'kit', 's4', 'bag3', 'ghillie']) lootDrop(null, k, d.x + rand(-.8, .8), d.z + rand(-.8, .8), d.gy); d.smokeT = 60; } }
+    else if (d.smokeT > 0) { d.smokeT -= dt; if (Math.random() < dt * 22) FX.burst(d.x + rand(-.3, .3), d.y + 1.1, d.z + rand(-.3, .3), rand(-.1, .1), 1, rand(-.1, .1), 1, RED, rand(1.5, 2.6), rand(.08, .16)); } }
+}
+/* a crate drifts down under a half-size canopy onto a random point in the next ring; everyone can see the smoke for a minute */
+function airdrop() { const p = landPointIn(ZONE.white.x, ZONE.white.z, Math.max(8, ZONE.white.r * .8)), gy = Math.max(MAP.floorAt(p.x, p.z), MAP.sea), s = new Sk('sun'); s.box(1.4, 1.1, 1.4, 0, .55, 0, { tint: AMBER, tone: -1 }); s.line([-.7, 1.12, -.7, .7, 1.12, .7, -.7, 1.12, .7, .7, 1.12, -.7]); s.box(1.46, .14, .2, 0, .55, 0, { tone: 1 }); s.box(.2, .14, 1.46, 0, .55, 0, { tone: 1 });
+  const g = s.bake(fillMat({ objSpace: true, freq: 30, fog: .003 }), lineMat({ width: 1.3 })); g.traverse(o => o.frustumCulled = false); g.position.set(p.x, 230, p.z); scene.add(g); const chute = chuteModel(); chute.scale.setScalar(.7); scene.add(chute);
+  ZONE.drops.push({ x: p.x, z: p.z, y: 230, gy, g, chute, t: 0, falling: true, smokeT: 0 }); if (G.player.alive) { banner('空投', `${MAP.zoneAt(p.x, p.z) || '野外'} 方向`, 'go'); setTimeout(() => $('banner').classList.remove('on'), 2200); } SFX.radio && SFX.radio(1); }
+/* map overlays: both rings, every live drop */
+function drawZoneOn(g, k, ox = 0, oz = 0) { if (!ZONE.on) return; const B = ZONE.blue, W = ZONE.white; g.save(); g.lineWidth = 2.5; g.strokeStyle = '#2d6cb3'; g.beginPath(); g.arc((B.x - ox - MAP.ox) * k, (B.z - oz - MAP.oz) * k, B.r * k, 0, 6.2832); g.stroke(); g.fillStyle = 'rgba(45,108,179,.12)'; g.beginPath(); g.rect(-1e5, -1e5, 2e5, 2e5); g.arc((B.x - ox - MAP.ox) * k, (B.z - oz - MAP.oz) * k, B.r * k, 0, 6.2832, true); g.fill('evenodd');
+  if (W.r > 0 && ZONE.stage !== 'done') { g.lineWidth = 2; g.strokeStyle = '#f5f2ea'; g.beginPath(); g.arc((W.x - ox - MAP.ox) * k, (W.z - oz - MAP.oz) * k, W.r * k, 0, 6.2832); g.stroke(); g.strokeStyle = '#16161c'; g.lineWidth = 1; g.beginPath(); g.arc((W.x - ox - MAP.ox) * k, (W.z - oz - MAP.oz) * k, W.r * k, 0, 6.2832); g.stroke(); }
+  for (const d of ZONE.drops) { if (d.smokeT <= 0 && !d.falling) continue; const x = (d.x - ox - MAP.ox) * k, y = (d.z - oz - MAP.oz) * k; g.fillStyle = '#d42a2a'; g.strokeStyle = '#16161c'; g.lineWidth = 1.5; g.beginPath(); g.rect(x - 5, y - 5, 10, 10); g.fill(); g.stroke(); } g.restore(); }
+function zoneLabel() { if (!ZONE.on) return ['—', '阶段 1']; const P = ZONE_PH[ZONE.ph]; if (ZONE.stage === 'done') return ['0:00', '终局']; const left = Math.max(0, Math.ceil((ZONE.stage === 'wait' ? P.w : P.s) - ZONE.t)); return [`${(left / 60) | 0}:${String(left % 60).padStart(2, '0')}`, ZONE.stage === 'wait' ? `第 ${ZONE.ph + 1} 圈 · 等待` : `第 ${ZONE.ph + 1} 圈 · 收缩中`]; }

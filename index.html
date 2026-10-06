@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>INK ISLAND 墨岛</title>
+<link href="vendor/fonts/fonts.css" rel="stylesheet">
+<style>
+:root{--paper:#f5f2ea;--ink:#16161c;--red:#d42a2a;--amber:#e9a520;--blue:#2d6cb3;--grey:#9a978f}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink);font-family:"IBM Plex Mono","PingFang SC","Microsoft YaHei",monospace}
+#c,#fx{position:fixed;inset:0;width:100%;height:100%;display:block}
+#fx{pointer-events:none}
+.grain{position:fixed;inset:0;pointer-events:none;opacity:.10;mix-blend-mode:multiply;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 62%,rgba(22,22,28,.13) 100%)}
+.hand{font-family:"Architects Daughter","PingFang SC",cursive}
+.panel{background:var(--paper);border:2px solid var(--ink);box-shadow:5px 5px 0 rgba(22,22,28,.9)}
+button{font:inherit;cursor:pointer;border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:10px 22px;letter-spacing:2px}
+button.pri{background:var(--ink);color:var(--paper)}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;display:none}
+#hud.on{display:block}
+#top{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:0}
+#top div{padding:5px 16px;border:2px solid var(--ink);background:var(--paper);text-align:center;min-width:110px}
+#top b{font-size:24px;line-height:1;display:block}
+#top small{font-size:10px;letter-spacing:3px;display:block;margin-top:2px}
+#timer.warn{color:var(--blue)} #top.outside div:nth-child(2){background:var(--blue);color:var(--paper);border-color:var(--blue)}
+#radarBox{position:absolute;top:14px;left:14px}
+#radar{width:176px;height:176px;display:block;border-radius:50%;box-shadow:4px 4px 0 rgba(22,22,28,.9)}
+#zone{margin-top:8px;font-size:13px;text-align:center;letter-spacing:1px}
+#feed{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:5px;align-items:flex-end;font-size:13px}
+#feed div{padding:3px 9px;border:1.5px solid var(--ink);background:rgba(245,242,234,.92)}
+#feed div.me{border-color:var(--red);box-shadow:3px 3px 0 var(--red)}
+#feed .red{color:var(--red);font-weight:700} #feed .blue{color:var(--blue);font-weight:700} #feed i{font-style:normal;margin:0 5px;opacity:.75}
+#hpBox{position:absolute;left:18px;bottom:18px;display:flex;gap:14px;align-items:flex-end}
+#stamBox .bar{margin-top:2px}
+.stat{min-width:150px}
+.stat .row{display:flex;align-items:baseline;gap:8px}
+.stat .big{font-size:44px;font-weight:700;line-height:.95}
+.stat .lab{font-size:11px;letter-spacing:3px}
+.bar{height:9px;border:1.5px solid var(--ink);margin-top:5px;background:var(--paper)}
+.bar i{display:block;height:100%;background:var(--ink)}
+#hpBox.low #hp{color:var(--red)} #hpBox.low #hpBar{background:repeating-linear-gradient(45deg,var(--red) 0 1.4px,transparent 1.4px 5px)}
+#ammoBox{position:absolute;right:18px;bottom:18px;text-align:right}
+#mag{font-size:54px;font-weight:700;line-height:.9} #res{font-size:22px;opacity:.7;margin-left:6px}
+#wname{font-size:17px;margin-top:4px} #wen{font-size:10px;letter-spacing:3px;opacity:.7}
+#slots{margin-top:8px;font-size:11px;display:flex;gap:6px;justify-content:flex-end}
+#slots span{padding:2px 7px;border:1.5px solid var(--ink);background:rgba(245,242,234,.85)} #slots span.cur{background:var(--ink);color:var(--paper)}
+#weaponState{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);font-size:12px;letter-spacing:1px;background:rgba(245,242,234,.85);padding:2px 8px}
+#weaponState:empty{display:none}
+#pickup{position:absolute;left:58%;top:50%;transform:translateY(-50%);font-size:13px;letter-spacing:1px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+#pickup:empty{display:none}
+#pickup div{background:rgba(245,242,234,.92);border:1.5px solid var(--ink);padding:3px 10px}
+#pickup div.near{box-shadow:3px 3px 0 rgba(22,22,28,.9);font-weight:700}
+#pickup b{background:var(--ink);color:var(--paper);padding:0 6px;margin-right:6px}
+#pickup small{opacity:.6;margin-left:6px}
+#prog{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);width:220px;display:none;text-align:center;font-size:12px;letter-spacing:2px}
+#prog .bar{margin-top:4px}
+#gear{position:absolute;right:18px;bottom:112px;display:flex;gap:6px;font-size:11px}
+#gear span{padding:2px 7px;border:1.5px solid var(--ink);background:rgba(245,242,234,.85)} #gear span:empty{display:none}
+#meds{position:absolute;left:18px;bottom:88px;display:flex;gap:6px;font-size:11px}
+#meds span{padding:2px 7px;border:1.5px solid var(--ink);background:rgba(245,242,234,.85);opacity:.45} #meds span.have{opacity:1} #meds b{margin-left:3px}
+#crate{z-index:5}
+#crate .panel{min-width:360px;text-align:left}
+#crate h2{text-align:center}
+#crate table{width:100%;border-collapse:collapse;font-size:13px}
+#crate td{padding:5px 8px;border-bottom:1px solid rgba(22,22,28,.2)} #crate td:last-child{text-align:right}
+#crate td button{padding:2px 10px;font-size:11px;letter-spacing:0}
+#inv{z-index:5}
+#pause{background:transparent;justify-content:flex-start;align-items:flex-start}
+#pause .panel{margin:18vh 0 0 24px;min-width:200px;padding:18px 22px;box-shadow:4px 4px 0 rgba(22,22,28,.9)}
+#pause h2{font-size:20px;margin-bottom:4px}
+#pause p{margin-bottom:10px}
+#pause .btns{flex-direction:column;gap:6px}
+#pause button{padding:7px 14px;font-size:12px}
+#inv .panel{min-width:420px;max-width:92vw;text-align:left}
+.invCols{display:flex;gap:22px;align-items:flex-start} .invCols>div{flex:1;min-width:0} .invCols>div:last-child{flex:.8} #inv h3{font-size:11px;letter-spacing:4px;margin:4px 0 6px;opacity:.7} #inv tr[draggable]{cursor:grab} #inv table.over{outline:2px dashed var(--blue);outline-offset:4px} #inv td.empty{opacity:.5;text-align:left!important}
+#end{background:transparent;justify-content:flex-end;align-items:flex-end;padding:0 28px 28px 0} #end .panel{min-width:420px;max-width:520px;background:rgba(245,242,234,.94)} #end h2{font-size:24px;letter-spacing:4px;white-space:nowrap} #endPose{font-size:11px;letter-spacing:3px;color:var(--blue);margin-top:4px} #endHist{display:block;width:100%;height:96px;margin:0 0 12px;border-top:1px solid rgba(22,22,28,.2);padding-top:6px}
+#endStats{font-size:13px;line-height:1.9;text-align:left;margin:6px 0 14px;border-top:1px solid rgba(22,22,28,.2);padding-top:10px}
+#inv h2{text-align:center}
+#inv table{width:100%;border-collapse:collapse;font-size:13px}
+#inv td{padding:6px 8px;border-bottom:1px solid rgba(22,22,28,.2)} #inv td:last-child{text-align:right;opacity:.75}
+#help{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:1px;opacity:.55;white-space:nowrap}
+#banner{position:absolute;top:21%;left:50%;transform:translate(-50%,-10px) rotate(-1.2deg);text-align:center;opacity:0;transition:all .25s}
+#banner.on{opacity:1;transform:translate(-50%,0) rotate(-1.2deg)}
+#bannerT{font-size:44px;letter-spacing:10px;padding:2px 26px;display:inline-block;background:var(--ink);color:var(--paper)}
+#banner.b-win #bannerT{background:var(--blue)} #banner.b-lose #bannerT{background:var(--red)} #banner.b-go #bannerT{background:var(--amber);color:var(--ink)}
+#bannerS:empty{display:none}
+#bannerS{margin-top:9px;font-size:14px;letter-spacing:2px;background:rgba(245,242,234,.85);display:inline-block;padding:2px 10px}
+#scope{position:fixed;inset:0;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0,transparent 37vh,var(--ink) 37.3vh)}
+#scope.on{display:block}
+#flashOv{position:fixed;inset:0;pointer-events:none;background:#f5f2ea;opacity:0;z-index:4}
+#smokeOv{position:fixed;inset:0;pointer-events:none;background:#d8d4c8;opacity:0;z-index:3}
+#weatherOv{position:fixed;inset:0;pointer-events:none;mix-blend-mode:multiply;z-index:2}
+#inv button.drop{padding:1px 8px;font-size:11px;margin-left:8px;border-width:1.5px;letter-spacing:0}
+#markerLab{position:absolute;top:96px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:2px;color:var(--amber);font-weight:700}
+#scope::before,#scope::after{content:"";position:absolute;left:50%;top:50%;background:var(--ink)}
+#scope::before{width:1px;height:74vh;transform:translate(-50%,-50%)} #scope::after{height:1px;width:74vh;transform:translate(-50%,-50%)}
+#captureMouse{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:auto;z-index:5}
+
+/* overlays */
+.ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(245,242,234,.6);z-index:6}
+.ov.on{display:flex}
+.ov .panel{padding:30px 40px;text-align:center;min-width:320px}
+.ov h2{font-size:30px;letter-spacing:6px;margin-bottom:10px}
+.ov p{font-size:13px;line-height:1.8;margin-bottom:18px;opacity:.8}
+.ov .btns{display:flex;gap:10px;justify-content:center}
+#menu{background:var(--paper)}
+#menu .panel{min-width:420px}
+#menu h1{font-size:64px;letter-spacing:4px;line-height:.95}
+#menu h1 span{color:var(--red)}
+#menu .sub{font-size:14px;letter-spacing:8px;margin:6px 0 18px}
+#menu .tag{font-size:11px;letter-spacing:2px;opacity:.6;margin-bottom:18px}
+.opt{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:12px;letter-spacing:1px}
+.opt label{width:92px;text-align:left;opacity:.8}
+.opt input[type=range]{flex:1;accent-color:var(--ink)}
+.seg{display:flex;flex:1}
+.seg button{flex:1;padding:8px 0;font-size:12px;letter-spacing:1px;border-right-width:0}
+.seg button:last-child{border-right-width:2px}
+.seg button.sel{background:var(--ink);color:var(--paper)}
+#menu .btns{margin-top:18px}
+#menu .foot{font-size:11px;line-height:1.8;opacity:.6;margin-top:14px}
+#loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--paper);z-index:9}
+#loading b{font-size:34px;letter-spacing:6px} #loading span{font-size:12px;letter-spacing:3px;opacity:.6}
+/* phone layer: paper buttons on the right thumb, a stick that appears where the left thumb lands */
+#touch{position:fixed;inset:0;display:none;z-index:4;touch-action:none;-webkit-tap-highlight-color:transparent}
+#touch.on{display:block}
+#joyBase{position:absolute;display:none;width:124px;height:124px;margin:-62px 0 0 -62px;border:2px solid var(--ink);border-radius:50%;background:rgba(245,242,234,.35);pointer-events:none}
+#joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:var(--ink);opacity:.8;transform:translate(-50%,-50%)}
+.tb{position:absolute;width:62px;height:62px;border:2px solid var(--ink);border-radius:50%;background:rgba(245,242,234,.82);color:var(--ink);font:12px "IBM Plex Mono","PingFang SC",monospace;letter-spacing:1px;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:3px 3px 0 rgba(22,22,28,.55);line-height:1.15}
+.tb.sq{border-radius:6px;width:54px;height:40px;font-size:11px}
+.tb.big{width:92px;height:92px;font-size:15px}
+.tb.dn{background:var(--ink);color:var(--paper);transform:scale(.94)}
+.tb.off{opacity:.3}
+.tb.hint{background:var(--amber);border-color:var(--ink)}
+#tFire{right:120px;bottom:20px} #tFire2{left:46%;bottom:40px;width:70px;height:70px;font-size:13px} #tAim{right:150px;bottom:130px} #tJump{right:76px;bottom:120px} #tReload{right:224px;bottom:100px} #tUse{right:230px;bottom:20px;width:70px;height:70px}
+#tSwap{right:224px;bottom:176px} #tMode{right:150px;bottom:204px} #tNade{right:300px;bottom:170px;width:50px;height:50px;font-size:11px} #tThrow{right:310px;bottom:84px}
+#tSprint{left:290px;bottom:100px;width:52px;height:52px} #tCrouch{left:12px;bottom:100px;width:52px;height:52px} #tProne{left:12px;bottom:162px;width:52px;height:52px}
+#tMap{top:12px;right:16px} #tBag{top:12px;right:80px} #tPause{top:12px;right:144px} #tBand{top:62px;right:16px} #tPill{top:62px;right:80px}
+#replayTag{position:fixed;left:50%;top:18px;transform:translateX(-50%);display:none;padding:6px 16px 8px;border:2px solid var(--ink);background:var(--paper);font-size:12px;letter-spacing:3px;z-index:5;cursor:pointer;text-align:center} #replayTag.on{display:block} #replayTag .bar{height:3px;background:rgba(22,22,28,.2);margin-top:6px} #replayTag .bar i{display:block;height:100%;background:var(--blue);width:0}
+#brainFoot{margin-top:10px;color:var(--blue)} #brainFoot button{margin-left:6px} .brainNote{margin-top:10px;font-size:11px;letter-spacing:1px;color:var(--blue)}
+body.touch #help,body.touch #captureMouse{display:none!important}
+body.touch #top div{min-width:84px;padding:3px 8px} body.touch #top b{font-size:18px}
+body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch #ammoBox{transform:scale(.8);transform-origin:right bottom}
+body.touch #gear{top:90px;bottom:auto;left:50%;right:auto;transform:translateX(-50%)}
+body.touch .ov .panel{padding:18px 20px;min-width:0;max-width:94vw;max-height:92vh;overflow:auto}
+body.touch #inv .panel,body.touch #crate .panel{min-width:0;width:min(94vw,520px)}
+body.touch #pause .panel{margin:12vh 0 0 16px}
+body.touch #bigmap canvas{width:min(78vh,86vw)!important;height:min(78vh,86vw)!important}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<canvas id="fx"></canvas>
+<div class="vig"></div>
+<div id="scope"></div>
+<div id="flashOv"></div><div id="smokeOv"></div><div id="weatherOv"></div>
+
+<div id="hud">
+  <div id="top"><div><b id="alive">24</b><small>存活</small></div><div><b id="timer">—</b><small id="phase">阶段 1</small></div><div><b id="kills">0</b><small>击倒</small></div></div>
+  <div id="radarBox"><canvas id="radar" width="176" height="176"></canvas><div id="zone"></div></div>
+  <div id="feed"></div>
+  <div id="hpBox"><div class="stat"><div id="boostBox" hidden class="bar" style="height:5px;margin-bottom:3px;border-color:var(--amber)"><i id="boostBar" style="width:0;background:var(--amber)"></i></div><div class="row"><span class="big" id="hp">100</span><span class="lab">生命 HP</span></div><div class="bar"><i id="hpBar" style="width:100%"></i></div></div>
+    <div class="stat" id="stamBox" hidden style="min-width:90px"><div class="row"><span class="lab">体力</span></div><div class="bar"><i id="stamBar" style="width:100%;background:var(--amber)"></i></div></div>
+    <div class="stat" style="min-width:110px"><div class="row"><span class="big" id="ar">0</span><span class="lab">护甲 AP</span></div><div class="bar"><i id="arBar" style="width:0"></i></div></div></div>
+  <div id="ammoBox"><div><span id="mag">—</span><span id="res"></span></div><div id="wname"></div><div id="wen"></div><div id="slots"></div></div>
+  <div id="weaponState"></div>
+  <div id="markerLab"></div>
+  <div id="pickup"></div>
+  <div id="prog"><div id="progLab"></div><div class="bar"><i id="progBar"></i></div></div>
+  <div id="gear"><span id="gVest">甲 0</span><span id="gHelm">盔 0</span><span id="gBag">包 0</span><span id="gScope"></span></div>
+  <div id="meds"><span id="m_band">7 绷带 <b>0</b></span><span id="m_kit">8 急救 <b>0</b></span><span id="m_medkit">9 医疗箱 <b>0</b></span><span id="m_pill">0 止痛 <b>0</b></span><span id="m_drink">- 饮料 <b>0</b></span><span id="m_adren">= 肾上腺素 <b>0</b></span></div>
+  <div id="banner"><div id="bannerT"></div><div id="bannerS"></div></div>
+  <div id="help">WASD 移动 · SHIFT 冲刺 · Q/E 探头 · ALT 自由视角 · C 蹲 · Z 趴 · 空格 跳/攀爬 · 左键 开火 · 右键 瞄准 · B 单连发 · R 换弹 · F 拾取/上车/开箱 · G/4 投掷物 · 7-0 - = 药品 · TAB 背包 · M 地图(点击标记) · ESC 暂停</div>
+</div>
+<button id="captureMouse" class="pri" hidden>点击进入鼠标控制</button>
+
+<div id="menu" class="ov on"><div class="panel">
+  <h1 class="hand">INK<br><span>ISLAND</span></h1><div class="sub">墨 岛</div>
+  <div class="tag">640 m 小岛 · 九处据点 · 单人对 Bot</div>
+  <div class="opt"><label>对手</label><div id="optDiff" class="seg"><button data-v="0">新兵</button><button data-v="1">老兵</button><button data-v="2">精英</button></div></div>
+  <div class="opt"><label>人数</label><div id="optBots" class="seg"><button data-v="11">12 人</button><button data-v="23">24 人</button></div></div>
+  <div class="opt"><label>鼠标</label><div id="optAim" class="seg"><button data-v="mouse">鼠标</button><button data-v="trackpad">触控板</button></div></div>
+  <div class="opt"><label>画质</label><div id="optQ" class="seg"><button data-v="low">省电</button><button data-v="balanced">均衡</button><button data-v="high">精细</button></div></div>
+  <div class="opt"><label>灵敏度 <span id="sSensV"></span></label><input id="sSens" type="range" min="0.3" max="3" step="0.1"></div>
+  <div class="opt"><label>音量 <span id="sVolV"></span></label><input id="sVol" type="range" min="0" max="1" step="0.05"></div>
+  <div class="btns"><button id="start" class="pri">起飞</button></div>
+  <p id="brainFoot" class="foot"></p>
+  <p class="foot">落地先找枪。白圈是下一圈，蓝圈外会持续掉血。F 拾取 · TAB 背包 · M 全图</p>
+</div></div>
+<div id="bigmap" class="ov"><div class="panel" style="padding:12px"><canvas id="bigMapC" width="900" height="900" style="display:block;width:min(86vh,86vw);height:min(86vh,86vw)"></canvas><div style="font-size:11px;letter-spacing:2px;margin-top:8px;text-align:center">M 关闭 · 640 × 640 m</div></div></div>
+<div id="inv" class="ov"><div class="panel"><h2>背 包</h2><div class="invCols"><div><h3>身 上</h3><table id="invT"></table></div><div><h3>脚 下</h3><table id="invG"></table></div></div><p style="text-align:center;margin-top:14px">TAB 关闭 · 拖拽：脚下→身上 拾取，身上→脚下 丢弃 · 7-0 - = 用药 · 弹药可拆半</p></div></div>
+<div id="end" class="ov"><div class="panel"><h2 id="endT">墨尽纸白 · 岛上只剩你</h2><p id="endS"></p><p id="endPose" class="pose"></p><div id="endStats"></div><canvas id="endHist" width="380" height="96"></canvas><div class="btns"><button id="endAgain" class="pri">再来一局</button></div></div></div>
+<div id="crate" class="ov"><div class="panel"><h2 id="crateT">箱子</h2><p id="crateT2"></p><table id="crateList"></table><div class="btns" style="margin-top:12px"><button id="crateAll" class="pri">全部拿取</button><button id="crateClose">关闭 (F)</button></div></div></div>
+<div id="pause" class="ov"><div class="panel"><h2>暂停</h2><p>ESC 继续</p><div class="btns"><button id="resume" class="pri">继续</button><button id="quit">回到菜单</button></div></div></div>
+<div id="dead" class="ov"><div class="panel"><h2 id="deadT">你被淘汰了</h2><p id="deadBy"></p><div id="deadStats"></div><div class="btns"><button id="again" class="pri">再来一局</button><button id="deadReplay">回放</button><button id="deadWatch">看完这局</button></div></div></div>
+
+<div id="touch">
+  <div id="joyBase"><div id="joyKnob"></div></div>
+  <div class="tb big" id="tFire" data-b="fire">开火</div><div class="tb" id="tFire2" data-b="fire">开火</div><div class="tb" id="tAim" data-b="aim">瞄准</div><div class="tb" id="tJump" data-b="jump">跳</div><div class="tb" id="tReload" data-b="reload">换弹</div><div class="tb" id="tUse" data-b="use">拾取</div>
+  <div class="tb" id="tSwap" data-b="swap">切枪</div><div class="tb" id="tMode" data-b="mode">单连</div><div class="tb" id="tNade" data-b="nade">投掷物</div><div class="tb" id="tThrow" data-b="throw">投出</div>
+  <div class="tb" id="tSprint" data-b="sprint">冲刺</div><div class="tb" id="tCrouch" data-b="crouch">蹲</div><div class="tb" id="tProne" data-b="prone">趴</div>
+  <div class="tb sq" id="tMap" data-b="map">地图</div><div class="tb sq" id="tBag" data-b="bag">背包</div><div class="tb sq" id="tPause" data-b="pause">暂停</div><div class="tb sq" id="tBand" data-b="band">绷带</div><div class="tb sq" id="tPill" data-b="pill">止痛</div>
+</div>
+<div id="replayTag"><span id="replayTxt"></span><div class="bar"><i id="replayBar"></i></div></div>
+<div id="loading"><b class="hand">INK ISLAND</b><span id="loadTxt">正在起稿…</span></div>
+<div class="grain"></div>
+
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js","three/addons/":"./vendor/addons/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
+const files = ['core', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'lootgeo', 'actors', 'fx', 'br', 'game', 'combat', 'vehicle', 'crate', 'touch', 'replay', 'brain', 'finale'];
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
+</script>
+</body>
+</html>

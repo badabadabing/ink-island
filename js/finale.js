@@ -1,0 +1,27 @@
+'use strict';
+/* ============ INK ISLAND · finale: the winner takes a bow on the paper — a different pose each time — while the panel shows the match and the matches before it ============ */
+const FINALE = { on: false, who: null, pose: null, t: 0, label: '' };
+/* each pose is a function of time that writes shoulder / leg / torso angles straight onto the model (after animSoldier has run for the frame) */
+const POSES = {
+  cheer: { name: '举臂欢呼', gun: false, fn: (m, t) => { const b = Math.max(0, Math.sin(t * 5.2)); m.armR.rotation.set(-2.9 + b * .15, -.2, -.35); m.armL.rotation.set(-2.9 + b * .15, .2, .35); m.upper.rotation.set(-.12, 0, 0); m.head.rotation.set(-.25, 0, 0); m.root.position.y += b * .14; } },
+  salute: { name: '抱拳', gun: false, fn: (m, t) => { const bow = .22 * (.5 - .5 * Math.cos(Math.min(1, t / 1.2) * Math.PI * 2)); m.armR.rotation.set(-.95, .9, .35); m.armL.rotation.set(-.95, -.9, -.35); m.upper.rotation.set(.1 + bow, 0, 0); m.head.rotation.set(.05 + bow * .6, 0, 0); } },
+  kneel: { name: '单膝跪地', gun: true, fn: (m, t) => { m.legR.rotation.set(-1.5, 0, 0); m.legR.shin.rotation.set(1.6, 0, 0); m.legL.rotation.set(.9, 0, 0); m.legL.shin.rotation.set(-1.9, 0, 0); m.root.position.y -= .3; m.armR.rotation.set(-.3, -.3, 0); m.armL.rotation.set(-.9, .3, .3); m.upper.rotation.set(.25, 0, 0); m.head.rotation.set(.35 - Math.max(0, Math.sin(t * 1.4)) * .3, 0, 0); } },
+  wave: { name: '挥手', gun: false, fn: (m, t) => { m.armR.rotation.set(-2.6, 0, -.4 + Math.sin(t * 6.5) * .35); m.armL.rotation.set(-1.22, .08, .1); m.upper.rotation.set(0, Math.sin(t * 6.5) * .04, 0); m.head.rotation.set(-.1, Math.sin(t * 1.1) * .3, 0); } },
+  bow: { name: '鞠躬', gun: false, fn: (m, t) => { const u = Math.min(1, t / .9), k = u < .5 ? u * 2 : 1 - clamp((t - 3) / .6, 0, 1); m.armR.rotation.set(-1.22, 0, 0); m.armL.rotation.set(-1.22, 0, 0); m.upper.rotation.set(.9 * k, 0, 0); m.head.rotation.set(.2 * k, 0, 0); } }
+};
+function finaleStart(win) { const pl = G.player, who = win ? pl : G.ents.find(e => e.alive && e !== pl); $('hud').classList.remove('on'); $('endPose').textContent = ''; if (!who || !who.model) return; const kills = who.kills || 0, pick = a => a[Math.floor(Math.random() * a.length)];
+  const key = win ? (kills >= 6 ? 'cheer' : kills === 0 ? 'bow' : pick(['salute', 'wave', 'cheer', 'kneel'])) : pick(['salute', 'kneel', 'cheer', 'wave']); FINALE.on = true; FINALE.who = who; FINALE.pose = POSES[key]; FINALE.t = 0; FINALE.label = `${who.isPlayer ? '你' : who.name} · ${FINALE.pose.name}`; who.endPose = key; who.model.root.visible = true; $('hud').classList.remove('on'); $('endPose').textContent = FINALE.label; }
+function finaleStop() { if (FINALE.who && FINALE.who.model) FINALE.who.model.gun.visible = true; FINALE.on = false; FINALE.who = null; }
+/* the match and the ones before: rank, kills and sharpness drawn as three thin ink lines */
+function drawHist() { const c = $('endHist'); if (!c || typeof BRAIN === 'undefined' || !BRAIN.data) return; c.width = c.clientWidth || 380; const h = (BRAIN.data.hist || []).filter(r => !r.quit); const g = c.getContext('2d'), W = c.width, H = c.height; g.clearRect(0, 0, W, H); g.font = '11px "IBM Plex Mono", monospace'; g.fillStyle = '#16161c'; if (h.length < 2) { g.fillText('打完两局后这里画出名次、击杀和锐度的走势', 8, 20); return; }
+  const n = h.length, x = i => 14 + i * (W - 28) / (n - 1), series = [['名次', h.map(r => 1 - Math.min(24, r.rank) / 24), '#16161c'], ['击杀', h.map(r => Math.min(1, r.kills / 10)), '#d42a2a'], ['锐度', h.map(r => r.skill), '#2d6cb3']];
+  g.strokeStyle = 'rgba(22,22,28,.18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(14, H - 14); g.lineTo(W - 14, H - 14); g.stroke();
+  series.forEach(([name, v, col], si) => { g.strokeStyle = col; g.lineWidth = 1.5; g.beginPath(); v.forEach((y, i) => { const px = x(i), py = 14 + (1 - y) * (H - 32); i ? g.lineTo(px, py) : g.moveTo(px, py); }); g.stroke(); g.fillStyle = col; g.fillText(name, 14 + si * 54, H - 2); });
+  h.forEach((r, i) => { if (r.win) { g.fillStyle = '#e9a520'; g.beginPath(); g.arc(x(i), 14 + (1 - (1 - Math.min(24, r.rank) / 24)) * (H - 32), 3, 0, 6.3); g.fill(); } }); }
+(() => { const _end = endMatch, _cam = updateCamera, _start = startMatch;
+  endMatch = function (win) { _end(win); finaleStart(win); drawHist(); };
+  startMatch = function () { finaleStop(); return _start(); };
+  updateCamera = function (dt) { const F = FINALE; if (!F.on || G.state !== 'end' || !F.who || !F.who.alive || !F.who.model) return _cam(dt); F.t += dt; const who = F.who, m = who.model; m.root.position.copy(who.pos); m.root.rotation.set(0, who.yaw, 0); m.root.visible = true; if (F.pose !== POSES.kneel) { for (const L of [m.legL, m.legR]) { L.rotation.set(0, 0, 0); L.shin.rotation.set(0, 0, 0); } } F.pose.fn(m, F.t);
+    m.gun.visible = F.pose.gun !== false; const a = who.yaw + Math.PI + Math.sin(F.t * .25) * .8, r = 4.2, cx = who.pos.x + Math.sin(a) * r, cz = who.pos.z + Math.cos(a) * r, cy = who.pos.y + 1.5 + Math.sin(F.t * .4) * .15, rx = Math.cos(a), rz = -Math.sin(a); if (F.t < 1.2 && F.t > dt) camera.position.lerp(new THREE.Vector3(cx, cy, cz), 1 - Math.exp(-4 * dt)); else camera.position.set(cx, cy, cz); camera.lookAt(who.pos.x + rx * 1.1, who.pos.y + 1.0, who.pos.z + rz * 1.1); camera.fov = 46; camera.updateProjectionMatrix(); SFX.L.x = cx; SFX.L.z = cz; SFX.L.yaw = camera.rotation.y; };
+  const q = $('quit'); if (q) q.addEventListener('click', finaleStop);
+})();

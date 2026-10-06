@@ -1,0 +1,150 @@
+'use strict';
+/* ============ INK ISLAND · br: the drop plane, free fall, parachutes; bot landing choices ============ */
+const AIR = { alt: 230, speed: 36, fallV: 48, diveV: 72, glide: 11, chuteV: 6.5, chuteGlide: 9.5, autoChute: 55 };
+const PLANE = { on: false, t: 0, from: new V3(), to: new V3(), pos: new V3(), dir: new V3(), len: 0, model: null, yaw: 0 };
+let _chuteSrc = null, _planeSrc = null;
+
+/* a folded-paper canopy: a low dome of eight panels, riser lines down to the shoulders */
+function chuteModel() {
+  if (!_chuteSrc) { const s = new Sk('sun'), R = 3.2, n = 8, top = [0, 6.6, 0], rim = []; for (let i = 0; i < n; i++) { const a = i / n * 6.2832; rim.push([Math.cos(a) * R, 5.3, Math.sin(a) * R]); }
+    for (let i = 0; i < n; i++) { const a = rim[i], b = rim[(i + 1) % n], mid = [(a[0] + b[0]) / 2 * 1.04, 5.75, (a[2] + b[2]) / 2 * 1.04]; s.tri(top, b, a, i % 2 ? .33 : 0, PAPER); s.tri(a, b, mid, i % 2 ? 0 : .33, PAPER); s.line([top[0], top[1], top[2], a[0], a[1], a[2], a[0], a[1], a[2], b[0], b[1], b[2], a[0], a[1], a[2], 0, 1.55, 0]); }
+    s.poly(rim, true); _chuteSrc = s.bake(fillMat({ objSpace: true, freq: 30, fog: .003 }), lineMat({ width: 1.3 })); }
+  const g = new THREE.Group(); if (_chuteSrc.fill) g.add(new THREE.Mesh(_chuteSrc.fill.geometry, _chuteSrc.fill.material)); if (_chuteSrc.ink) g.add(new LineSegments2(_chuteSrc.ink.geometry, _chuteSrc.ink.material)); g.traverse(o => o.frustumCulled = false); return g;
+}
+/* the drop balloon: a tall paper envelope with gores and a scallop skirt, burner flame, rope cradle and a wicker basket; the basket floor is the model origin */
+function planeModel() {
+  if (!_planeSrc) { const s = new Sk('sun'), R = 15, cy = 26, n = 14;
+    s.add(new THREE.SphereGeometry(R, 24, 16).scale(1, 1.18, 1), new THREE.Matrix4().makeTranslation(0, cy, 0), { tone: -1, ea: 75 });
+    for (let i = 0; i < n; i++) { const a = i / n * 6.2832, q = []; for (let j = 0; j <= 12; j++) { const t = j / 12 * Math.PI, r = Math.sin(t) * R * 1.004; q.push([Math.cos(a) * r, cy - Math.cos(t) * R * 1.18 * 1.004, Math.sin(a) * r]); } s.poly(q); if (i % 2) { const q2 = []; for (let j = 2; j <= 10; j++) { const t = j / 12 * Math.PI, r = Math.sin(t) * R; q2.push([Math.cos(a) * r, cy - Math.cos(t) * R * 1.18, Math.sin(a) * r]); } for (let j = 0; j < q2.length - 1; j++) s.tri([0, cy, 0].map((v, k) => v * 0 + q2[j][k] * .999), q2[j + 1], [Math.cos(a - 6.2832 / n) * Math.sin((j + 2) / 12 * Math.PI) * R, cy - Math.cos((j + 2) / 12 * Math.PI) * R * 1.18, Math.sin(a - 6.2832 / n) * Math.sin((j + 2) / 12 * Math.PI) * R], .33, PAPER); } }
+    for (const t of [.35, .62]) { const q = []; for (let i = 0; i <= 28; i++) { const a = i / 28 * 6.2832, r = Math.sin(t * Math.PI) * R * 1.006; q.push([Math.cos(a) * r, cy - Math.cos(t * Math.PI) * R * 1.18, Math.sin(a) * r]); } s.poly(q); }   // seams
+    s.add(new THREE.CylinderGeometry(4.6, 2.2, 6, 14, 1, true), new THREE.Matrix4().makeTranslation(0, cy - R * 1.18 - 1.8, 0), { tone: .33, ea: 60 });   // skirt
+    const sq = []; for (let i = 0; i <= 14; i++) { const a = i / 14 * 6.2832; sq.push([Math.cos(a) * 2.2, cy - R * 1.18 - 4.8 + (i % 2 ? .5 : 0), Math.sin(a) * 2.2]); } s.poly(sq, true);
+    s.box(.9, .6, .9, 0, 5.3, 0, { tone: .66 }); s.cone(.7, 2.2, 7, 0, 6.9, 0, { tint: AMBER, tone: 0, edges: false }); for (const [x, z] of [[-.45, -.45], [.45, -.45], [-.45, .45], [.45, .45]]) s.line([x, 5.6, z, x * 4.6, cy - R * 1.18 - 4.6, z * 4.6]);   // burner and frame
+    s.box(5, 1.3, 5, 0, .65, 0, { tint: WOOD, tone: .33, bevel: 0 }); s.box(5.2, .14, 5.2, 0, 1.32, 0, { tint: WOOD, tone: .66 }); const w = []; for (let y = .2; y < 1.3; y += .22) w.push(-2.51, y, -2.51, -2.51, y, 2.51, 2.51, y, -2.51, 2.51, y, 2.51, -2.51, y, -2.51, 2.51, y, -2.51, -2.51, y, 2.51, 2.51, y, 2.51); for (let k = -2.2; k <= 2.2; k += .44) w.push(k, .05, -2.52, k, 1.28, -2.52, k, .05, 2.52, k, 1.28, 2.52, -2.52, .05, k, -2.52, 1.28, k, 2.52, .05, k, 2.52, 1.28, k); s.line(w);   // wicker
+    for (const [x, z] of [[-2.3, -2.3], [2.3, -2.3], [-2.3, 2.3], [2.3, 2.3]]) { s.line([x, 1.3, z, x * 1.6, cy - R * 1.18 - 3.5, z * 1.6]); s.cyl(.05, .05, 4.2, 5, x * 1.3, 3.4, z * 1.3, { tone: 1, edges: false }); }   // ropes
+    for (const [x, z] of [[-2.6, 0], [2.6, 0], [0, -2.6], [0, 2.6]]) s.box(.5, .4, .5, x, 1.1, z, { tint: WOOD, tone: .66 });   // sandbags on the rim
+    _planeSrc = s.bake(fillMat({ objSpace: true, freq: 20, fog: .0025 }), lineMat({ width: 1.4 })); }
+  const g = new THREE.Group(); if (_planeSrc.fill) g.add(new THREE.Mesh(_planeSrc.fill.geometry, _planeSrc.fill.material)); if (_planeSrc.ink) g.add(new LineSegments2(_planeSrc.ink.geometry, _planeSrc.ink.material)); g.traverse(o => o.frustumCulled = false); return g;
+}
+
+/* flight line: a random chord across the island, 800 m long so it starts and ends out over the sea */
+function planeStart() {
+  const a = rand(6.2832), off = rand(-70, 70), cx = Math.cos(a) * off, cz = Math.sin(a) * off, dx = -Math.sin(a), dz = Math.cos(a);
+  const L = MAP.size / 2 + 400; PLANE.from.set(cx - dx * L, AIR.alt, cz - dz * L); PLANE.to.set(cx + dx * L, AIR.alt, cz + dz * L); PLANE.dir.set(dx, 0, dz); PLANE.len = 2 * L; PLANE.t = 0; PLANE.on = true; PLANE.wasOver = false; PLANE.yaw = Math.atan2(-dx, -dz);
+  if (!PLANE.model) { PLANE.model = planeModel(); scene.add(PLANE.model); } PLANE.model.visible = true; PLANE.model.rotation.y = 0; PLANE.pos.copy(PLANE.from);
+}
+function planeUpdate(dt) { if (!PLANE.on) return; PLANE.t += AIR.speed * dt / PLANE.len; PLANE.pos.lerpVectors(PLANE.from, PLANE.to, Math.min(1, PLANE.t)); PLANE.model.position.copy(PLANE.pos); PLANE.model.position.y += Math.sin(G.now * .5) * .8; PLANE.model.rotation.z = Math.sin(G.now * .4) * .02; PLANE.model.rotation.x = Math.cos(G.now * .33) * .02;
+  const over = planeOverLand(); if (PLANE.wasOver && !over) { for (const e of G.ents) if (e.air === 'plane') jumpOut(e, true); } PLANE.wasOver = over;   // last call at the far coast: everyone still aboard goes
+  if (PLANE.t >= 1) { PLANE.on = false; PLANE.model.visible = false; for (const e of G.ents) if (e.air === 'plane') jumpOut(e); } }
+const planeOverLand = () => Math.hypot(PLANE.pos.x, PLANE.pos.z) < MAP.size / 2 - 6;
+
+/* ---- per-entity air state: 'plane' → 'fall' → 'chute' → null ---- */
+function boardPlane(e) { e.air = 'plane'; e.onGround = false; e.vel.set(0, 0, 0); if (e.model) e.model.root.visible = false; e.chute = null; e.alive = true; }
+function jumpOut(e, forced) { if (e.air !== 'plane') return; e.air = 'fall'; if (forced && e.isPlayer) { banner('强制跳伞', '气球已飘离海岸', 'lose'); setTimeout(() => $('banner').classList.remove('on'), 1800); } e.pos.copy(PLANE.pos); e.pos.x += rand(-2, 2); e.pos.z += rand(-2, 2); e.pos.y -= 1; e.vel.set(PLANE.dir.x * 12 + rand(-3, 3), -3, PLANE.dir.z * 12 + rand(-3, 3)); if (e.model) e.model.root.visible = true; e.jumpT = G.now; if (e.isPlayer) { SFX.swish(); } }
+function openChute(e) { if (e.air !== 'fall') return; e.air = 'chute'; e.chute = chuteModel(); scene.add(e.chute); e.chuteT = 0; if (e.isPlayer) SFX.land(null); }
+function landEntity(e, y) { e.air = null; if (!e.isPlayer) botLanded(e); e.pos.y = y; e.vel.set(0, 0, 0); e.onGround = true; e.landed = 0; if (e.chute) { scene.remove(e.chute); e.chute = null; } if (e.isPlayer) { SFX.step(null, .3); banner('落地', MAP.zoneAt(e.pos.x, e.pos.z) || '野外', 'go'); setTimeout(() => $('banner').classList.remove('on'), 1400); } }
+const groundBelow = e => { const near = MAP.near(e.pos.x, e.pos.z); let y = Math.max(MAP.terrainY(e.pos.x, e.pos.z), MAP.sea + SWIM_Y); for (const s of near) if (e.pos.x + e.hw > s.x1 && e.pos.x - e.hw < s.x2 && e.pos.z + e.hw > s.z1 && e.pos.z - e.hw < s.z2 && s.y2 <= e.pos.y + .3 && s.y2 > y) y = s.y2; return y; };
+/* wx/wz: wished horizontal direction (unit or zero); dive: 0..1 */
+function airUpdate(e, dt, wx, wz, dive, wantChute) {
+  if (e.air === 'plane') { e.pos.copy(PLANE.pos); return; }
+  const v = e.vel, chute = e.air === 'chute', tv = chute ? AIR.chuteV : lerp(AIR.fallV, AIR.diveV, dive), g = chute ? 14 : 20;
+  v.y = damp(v.y, -tv, chute ? 3.5 : 1.4, dt); const gl = chute ? AIR.chuteGlide : AIR.glide * (1 - dive * .5); v.x = damp(v.x, wx * gl, chute ? 2.2 : 3, dt); v.z = damp(v.z, wz * gl, chute ? 2.2 : 3, dt);
+  e.pos.x = clamp(e.pos.x + v.x * dt, MAP.bounds.x1, MAP.bounds.x2); e.pos.z = clamp(e.pos.z + v.z * dt, MAP.bounds.z1, MAP.bounds.z2); e.pos.y += v.y * dt;
+  const gy = groundBelow(e), h = e.pos.y - gy; e.agl = h;
+  if (!chute && (wantChute || h < AIR.autoChute)) openChute(e);
+  if (e.chute) { e.chuteT += dt; const k = Math.min(1, e.chuteT / .6); e.chute.position.copy(e.pos); e.chute.position.y += .2; e.chute.scale.setScalar(.15 + .85 * (1 - Math.pow(1 - k, 3))); e.chute.rotation.set(-v.z * .03, e.yaw, v.x * .03); }
+  if (h <= 0) { const hard = e.air === 'fall'; landEntity(e, gy); if (hard) hurt(e, 60, null, null, 'legs', null); }
+  if (wx || wz) e.yaw += angDiff(Math.atan2(-wx, -wz), e.yaw) * Math.min(1, dt * (chute ? 4 : 6));
+  if (e.model) { animSoldier(e, dt); e.model.root.rotation.x = chute ? .1 : -dive * .9 - .35; }
+}
+/* bots: pick a landing spot, jump when the plane passes it, steer there */
+function botPlanDrop(b, i, n) { const t = TOWNS[(i * 7 + Math.floor(rand(3))) % TOWNS.length], wild = Math.random() < .18, r = t.r * .8; let x, z; if (wild) { const E = MAP.size * .42; for (let k = 0; k < 30; k++) { x = rand(-E, E); z = rand(-E, E); if (MAP.terrainY(x, z) > 1.5) break; } } else { const a = rand(6.2832), d = Math.sqrt(Math.random()) * r; x = t.x + Math.cos(a) * d; z = t.z + Math.sin(a) * d; }
+  const c = navSnap(x, z), p = navPos(c); b.drop = { x: p.x, z: p.z, town: wild ? null : t }; b.dropDelay = rand(0, 1.2); b.name = b.name; }
+function botAir(b, dt) {
+  if (b.air === 'plane') { const d = b.drop, along = (d.x - PLANE.from.x) * PLANE.dir.x + (d.z - PLANE.from.z) * PLANE.dir.z, here = (PLANE.pos.x - PLANE.from.x) * PLANE.dir.x + (PLANE.pos.z - PLANE.from.z) * PLANE.dir.z;
+    if ((here >= along - 30 + b.dropDelay * 40 || PLANE.t > .95) && planeOverLand()) jumpOut(b); else airUpdate(b, dt, 0, 0, 0, false); return; }
+  const d = b.drop, dx = d.x - b.pos.x, dz = d.z - b.pos.z, dist = Math.hypot(dx, dz), h = b.agl || 100; let wx = 0, wz = 0; if (dist > 3) { wx = dx / dist; wz = dz / dist; }
+  const dive = dist < h * .6 ? 1 : dist > h * 1.5 ? 0 : .4, wantChute = h < AIR.autoChute + 20 && dist < 60;
+  airUpdate(b, dt, wx, wz, dive, wantChute);
+}
+
+/* ================= bot battle-royale brain: loot → rotate → camp, fights handled by actors.js ================= */
+function botLanded(b) { b.br = 'loot'; b.landT = G.now; b.ignore = new Set(); b.quick = true; b.campT = 0; b.lootTarget = null; b.path = null; b.waitT = 0; b.nextTick = 0; }
+const botGunOf = (b, slot) => b.inv && b.inv[slot];
+function botWants(b, it) { const d = ITEMS[it.k]; if (!b.inv) return false;
+  if (d.kind === 'gun') { const slot = WEAPONS[it.k].slot; if (!b.inv[slot]) return true; const cur = b.inv[slot]; return slot === 1 && (b.pool[AMMO[cur]] || 0) === 0 && (b.mags[cur] || 0) === 0 && cur !== it.k; }
+  if (d.kind === 'ammo') { for (const s of [1, 2]) { const g = b.inv[s]; if (g && AMMO[g] === d.t && (b.pool[d.t] || 0) < 120) return true; } return false; }
+  if (d.kind === 'med') return b.meds[it.k] < (it.k === 'kit' || it.k === 'medkit' || it.k === 'adren' ? 2 : 3);
+  if (d.kind === 'vest') return d.lv > b.vestLv || (d.lv === b.vestLv && b.armor < d.ap * .4); if (d.kind === 'helm') return d.lv > b.helmLv; if (d.kind === 'bag') return d.lv > b.bagLv; if (d.kind === 'suit') return !b.ghillie; if (d.kind === 'nade') return (b.nades[it.k] || 0) < 2 && !!(b.inv[1] || b.inv[2]); if (d.kind === 'scope') return !b.scope || ITEMS[b.scope].lv < d.lv; return false; }
+function botWantedItem(b) { let best = null, bs = 1e9; const R = b.inv[1] ? (b.dropR || 30) : 75; b.dropR = 0; for (const it of LOOT.items) { if (!it.alive || (b.ignore && b.ignore.has(it)) || !botWants(b, it)) continue; const d = Math.hypot(it.x - b.pos.x, it.z - b.pos.z); if (d > R) continue; let fl = null; if (Math.abs(it.y - b.pos.y) > 1.5) { fl = MAP.floorAtY(it.x, it.z, it.y); if (!fl || d > 40) continue; } if (ZONE.on && ZONE.stage === 'shrink' && !insideWhite(it.x, it.z, 4) && d > 14) continue; const kind = ITEMS[it.k].kind, sc = d + (fl ? 9 : 0) - (kind === 'gun' && !b.inv[1] ? 40 : 0) - (kind === 'ammo' ? 8 : 0) - (kind === 'vest' || kind === 'helm' ? 6 : 0); if (sc < bs) { bs = sc; best = it; } } return best; }
+function botCanReload(b, w) { return !!(b.pool && (b.pool[AMMO[b.weapon]] || 0) > 0); }
+function botFinishReload(b, w) { if (!b.pool) { b.mag = w.mag; return; } const t = AMMO[b.weapon], take = Math.min(w.mag, b.pool[t] || 0); b.mag = take; b.pool[t] = (b.pool[t] || 0) - take; b.mags[b.weapon] = b.mag; }
+function botSwapWeapon(b) { if (!b.inv) return; b.mags[b.weapon] = b.mag; let best = 'knife'; for (const s of [1, 2]) { const g = b.inv[s]; if (g && ((b.mags[g] || 0) > 0 || (b.pool[AMMO[g]] || 0) > 0)) { best = g; break; } } if (best === b.weapon) return; setEntWeapon(b, best); b.mag = best === 'knife' ? 0 : (b.mags[best] ?? 0); if (b.mag === 0 && best !== 'knife') b.reloadT = WEAPONS[best].reload; }
+function botHoldYaw(b, face) { return face ? Math.atan2(-(face.x - b.pos.x), -(face.z - b.pos.z)) : b.yaw; }
+function townInWhite() { const W = ZONE.white; return TOWNS.filter(t => Math.hypot(t.x - W.x, t.z - W.z) < Math.max(0, W.r - t.r * .4)); }
+function rotateGoal(b, urgent) { const W = ZONE.white; if (!b.rot || b.rotPh !== ZONE.ph || G.now > b.rotT) { const ts = townInWhite(); let tgt; if (ts.length && Math.random() < .7) { const t = ts.reduce((p, q) => Math.hypot(q.x - b.pos.x, q.z - b.pos.z) < Math.hypot(p.x - b.pos.x, p.z - b.pos.z) ? q : p); const a = rand(6.28), r = rand(4, t.r * .6); tgt = { x: t.x + Math.cos(a) * r, z: t.z + Math.sin(a) * r }; } else tgt = landPointIn(W.x, W.z, Math.max(5, W.r * .6)); const c = navSnap(tgt.x, tgt.z), p = navPos(c); b.rot = { x: p.x, z: p.z }; b.rotPh = ZONE.ph; b.rotT = G.now + 30; }
+  const farRide = Math.hypot(b.rot.x - b.pos.x, b.rot.z - b.pos.z); if (!b.veh && !b.wantVeh && farRide > 70 && b.hp > 35 && !b.targetVis && G.now > (b.noVehT || 0)) { const onRoad = v => v && (v.type !== 'jeep' || roadRoute(v.pos.x, v.pos.z, b.rot.x, b.rot.z)) ? v : null, v = (farRide > 110 ? onRoad(vehNearest(b, 'jeep', 60)) : null) || vehNearest(b, 'moto', 60) || onRoad(vehNearest(b, 'jeep', 40)); if (v) { b.wantVeh = v; b.wantVehT = G.now + 25; } } if (b.wantVeh) { const v = b.wantVeh; if (v.driver || v.hp <= 0 || v.flipped || G.now > b.wantVehT) b.wantVeh = null; else { b.quick = true; b.intent = v.type === 'jeep' ? '去开吉普' : '去骑摩托'; return { x: v.pos.x + Math.cos(v.yaw) * (v.t.hw + .6), z: v.pos.z - Math.sin(v.yaw) * (v.t.hw + .6) }; } }
+  b.quick = true; b.intent = urgent ? '逃出蓝圈' : '向白圈转移'; if ((b.pathFails || 0) > 2) { b.pathFails = 0; b.rot = null; const W2 = ZONE.white, dx = W2.x - b.pos.x, dz = W2.z - b.pos.z, d = Math.hypot(dx, dz) || 1; return { x: b.pos.x + dx / d * 25, z: b.pos.z + dz / d * 25 }; } const r = routeToward(b.pos.x, b.pos.z, b.rot.x, b.rot.z, 40); return r ? { x: r.x, z: r.z } : { x: b.rot.x, z: b.rot.z }; }
+function campGoal(b, now) { const W = ZONE.on ? ZONE.white : { x: b.pos.x, z: b.pos.z, r: 30 }; const F0 = MAP.floorOf(b); if (F0 && insideWhite(b.pos.x, b.pos.z, 8)) { b.quick = false; b.intent = '楼上守窗'; b.camp = { x: b.pos.x, z: b.pos.z }; b.campT = now + 30; b.campPh = ZONE.ph; return { x: b.pos.x, z: b.pos.z, hold: true, face: { x: W.x, z: W.z } }; } if (!b.camp || now > b.campT || b.campPh !== ZONE.ph) { let best = null, bs = -Infinity; for (let k = 0; k < 7; k++) { const p = landPointIn(W.x, W.z, Math.max(4, W.r * .72)), c = navSnap(p.x, p.z), q = navPos(c), cover = MAP.near(q.x, q.z).length + (MAP.townAt(q.x, q.z) ? 12 : 0) - Math.hypot(q.x - b.pos.x, q.z - b.pos.z) * .15 + (typeof brainCampBonus === 'function' ? brainCampBonus(b, q) : 0); if (cover > bs) { bs = cover; best = q; } } b.camp = best; b.campT = now + rand(20, 35); b.campPh = ZONE.ph; }
+  b.quick = false; b.intent = '守圈'; const d = Math.hypot(b.camp.x - b.pos.x, b.camp.z - b.pos.z); if (d > 45) { const r = routeToward(b.pos.x, b.pos.z, b.camp.x, b.camp.z, 40); b.quick = true; if (r) return { x: r.x, z: r.z }; } return { x: b.camp.x, z: b.camp.z, hold: true, face: { x: W.x, z: W.z } }; }
+function botObjective(b, now) { const goal = botObjectiveCore(b, now); if (!goal || b.air || !b.inv) return goal;
+  const F = MAP.floorOf(b), it = b.lootTarget, itF = it && Math.abs(it.y - b.pos.y) > 1.5 ? MAP.floorAtY(it.x, it.z, it.y) : null;
+  if (F) { // upstairs: the open room is walkable directly; anything else means the stair first
+    const onF = goal.x >= F.x1 && goal.x <= F.x2 && goal.z >= F.z1 && goal.z <= F.z2 && !itF && (!it || Math.abs(it.y - F.y) < .7); if (onF) { b.forcePath = [{ x: goal.x, z: goal.z, y: F.y }]; return goal; }
+    if (!goal.hold || itF) { b.forcePath = [{ x: F.exit.x, z: F.exit.z, y: F.y }, { x: F.top.x, z: F.top.z, y: F.y }, { x: F.bottom.x, z: F.bottom.z, y: F.bottom.y }]; b.stairT = now + 12; b.intent = '下楼'; return { x: F.bottom.x, z: F.bottom.z }; }
+    b.forcePath = [{ x: b.pos.x, z: b.pos.z, y: b.pos.y }]; return goal; }   // holding upstairs: a window post
+  if (itF) { const near = Math.hypot(itF.bottom.x - b.pos.x, itF.bottom.z - b.pos.z) < 2.8 && Math.abs(b.pos.y - itF.bottom.y) < .7; if (near) { b.forcePath = [{ x: itF.top.x, z: itF.top.z, y: itF.y }, { x: itF.exit.x, z: itF.exit.z, y: itF.y }, { x: it.x, z: it.z, y: it.y }]; b.stairT = now + 12; b.intent = '上楼搜刮'; return { x: it.x, z: it.z }; } b.intent = '去楼梯'; return { x: itF.bottom.x, z: itF.bottom.z }; }
+  return goal; }
+function botObjectiveCore(b, now) {
+  if (b.air || !b.inv) return null; const inB = !ZONE.on || !outsideZone(b), inW = !ZONE.on || insideWhite(b.pos.x, b.pos.z, 6), shrinking = ZONE.on && ZONE.stage === 'shrink', P = ZONE_PH[ZONE.ph] || ZONE_PH[6];
+  const distOut = ZONE.on ? Math.hypot(b.pos.x - ZONE.white.x, b.pos.z - ZONE.white.z) - ZONE.white.r : -1, timeLeft = !ZONE.on ? 999 : ZONE.stage === 'wait' ? (P.w - ZONE.t) + P.s * .45 : ZONE.stage === 'shrink' ? (P.s - ZONE.t) * .45 : 0, urgentZone = ZONE.on && !inW && (!inB || timeLeft < distOut / 3.6 + 14);   // leave early enough to walk there
+  b.lootTarget = null;
+  const fire = typeof inFire === 'function' && inFire(b); if (fire) { const dx = b.pos.x - fire.x, dz = b.pos.z - fire.z, d = Math.hypot(dx, dz) || 1; b.quick = true; b.intent = '躲火'; healCancel(b); return { x: b.pos.x + dx / d * 7, z: b.pos.z + dz / d * 7 }; }
+  if (!inB) return rotateGoal(b, true);
+  if (b.hp < 55 && !b.targetVis && now - b.lastSeenT > 3 && !b.heal && (b.meds.kit || b.meds.band || b.meds.medkit) && (inW || !shrinking)) { if (healStart(b, b.meds.medkit && b.hp < 35 ? 'medkit' : b.meds.kit && b.hp < 50 ? 'kit' : b.meds.band ? 'band' : 'kit')) { b.act = { type: 'heal', t: 0 }; b.intent = '包扎'; return { x: b.pos.x, z: b.pos.z, hold: true, face: b.lastSeenT > 0 ? { x: b.lastSeen.x, z: b.lastSeen.z } : null }; } }
+  if (b.huntTarget && b.huntTarget.alive && !b.huntTarget.air && b.huntTarget.hp < 55 && now - (b.huntT || -99) < 14 && !b.targetVis && inB && (b.inv[1] || b.inv[2])) { const t = b.huntTarget, r = routeToward(b.pos.x, b.pos.z, t.pos.x, t.pos.z, 30); b.quick = true; b.intent = '追击伤员'; return r ? { x: r.x, z: r.z } : { x: t.pos.x, z: t.pos.z }; }
+  if (!urgentZone && (b.inv[1] || b.inv[2])) for (const d of ZONE.drops) { if (d.falling || d.smokeT <= 0 || d.taken) continue; const dd = Math.hypot(d.x - b.pos.x, d.z - b.pos.z); if (dd < 140 && dd > 12 && (b.vestLv < 3 || b.helmLv < 3) && insideWhite(d.x, d.z, 0)) { b.dropR = 80; const r = routeToward(b.pos.x, b.pos.z, d.x, d.z, 36); b.quick = true; b.intent = '去空投'; return r ? { x: r.x, z: r.z } : { x: d.x, z: d.z }; } }
+  const needGun = !b.inv[1] && !b.inv[2]; if (!urgentZone || needGun) { const it = botWantedItem(b); if (it) { b.lootTarget = it; b.quick = true; b.intent = '搜刮 ' + ITEMS[it.k].name; return { x: it.x, z: it.z }; } }
+  if (!inW) return rotateGoal(b, false);
+  return campGoal(b, now);
+}
+/* slow tick: pick up, melee, weapon housekeeping */
+function botTick(b, now) {
+  if (!b.alive || b.air || !b.inv) return; if (now < (b.nextTick || 0)) return; b.nextTick = now + .25; if (((b.tickN = (b.tickN || 0) + 1) & 15) === 0) invCheck(b, 'tick');
+  if (b.act && b.act.type === 'heal' && !b.heal) b.act = null;
+  if (b.wantVeh) { const v = b.wantVeh; if (!v.driver && !v.flipped && v.hp > 0 && Math.hypot(v.pos.x - b.pos.x, v.pos.z - b.pos.z) < v.t.hw + 2.2) { vehEnter(b, v); b.driveTarget = b.rot ? { ...b.rot } : { x: ZONE.white.x, z: ZONE.white.z }; { let best = null, bs = 0; const T = b.driveTarget; for (let i = 0; i < 6; i++) { const a = i * 1.047, c = navSnap(T.x + Math.cos(a) * 10, T.z + Math.sin(a) * 10); if (!MAP.reach[c]) continue; const p = navPos(c); let sc = 0; for (const s of MAP.near(p.x, p.z)) if (!s.glass && s.y2 > p.y + .8 && p.x > s.x1 - 4 && p.x < s.x2 + 4 && p.z > s.z1 - 4 && p.z < s.z2 + 4) sc++; if (sc > bs) { bs = sc; best = p; } } if (best) b.afterRide = { x: best.x, z: best.z }; } b.drive = { acc: 0, steer: 0 }; b.driveStuck = 0; b.roadPts = undefined; b.drvBest = undefined; b.drvProgT = G.now; b.drvChkT = 0; b.driveWp = null; b.path = null; b.wantVeh = null; b.intent = '骑行'; } }
+  // escape watchdog: no progress toward the white ring for 10 s means the path is lying; go straight and hop
+  if (ZONE.on && (b.intent === '逃出蓝圈' || b.intent === '向白圈转移')) { const dOut = Math.hypot(b.pos.x - ZONE.white.x, b.pos.z - ZONE.white.z) - ZONE.white.r; if (b.escBest === undefined || dOut < b.escBest - 2) { b.escBest = dOut; b.escT = now; } else if (now - b.escT > 10) { b.escT = now; b.pathFails = 3; b.path = null; b.waitT = 0; b.rot = null; if (b.onGround) { b.vel.y = 5.9; b.onGround = false; } } } else b.escBest = undefined;
+  // the wash moved: drop whatever errand this was and re-plan
+  if (ZONE.on && now > (b.zoneCheckT || 0)) { b.zoneCheckT = now + 2; const esc = b.intent === '逃出蓝圈' || b.intent === '向白圈转移'; if (!esc && (outsideZone(b) || (ZONE.stage === 'shrink' && !insideWhite(b.pos.x, b.pos.z, 6) && !b.targetVis))) { b.path = null; b.waitT = 0; b.holdGoal = null; if (b.act && b.act.type === 'heal') { healCancel(b); } } }
+  // stranded on a roof or ledge the nav grid does not know: walk toward the goal and drop off the edge
+  const navY = MAP.fh[navIdx(b.pos.x, b.pos.z)]; if (b.onGround && b.pos.y > navY + 1.2 && !b.targetVis && !MAP.floorOf(b) && !(b.path && b.path.some(n => n.y !== undefined)) && !(b.stairT > now)) { const W = ZONE.on ? ZONE.white : { x: 0, z: 0 }, dx = W.x - b.pos.x, dz = W.z - b.pos.z, d = Math.hypot(dx, dz) || 1, a = Math.atan2(dz, dx) + (now * .5 % 6.28) * 0; b.path = [{ x: b.pos.x, z: b.pos.z, y: b.pos.y }, { x: b.pos.x + dx / d * 7, z: b.pos.z + dz / d * 7, y: b.pos.y }]; b.pi = 1; b.repathT = now + 1.5; b.intent = '跳下屋顶'; if (b.stuckT > .4 && now > b.jumpT) { b.vel.y = 5.9; b.onGround = false; b.jumpT = now + 1; } }
+  const it = b.lootTarget; if (it) { if (!it.alive) { b.lootTarget = null; b.path = null; b.waitT = 0; } else if (Math.hypot(it.x - b.pos.x, it.z - b.pos.z) < 1.8 && Math.abs(it.y - b.pos.y) < 1.5) { const r = invTake(b, it); if (!r) b.ignore.add(it); else if (ITEMS[it.k].kind === 'gun') { b.mags[it.k] = WEAPONS[it.k].mag; if (b.weapon === 'knife' || WEAPONS[it.k].slot === 1) { setEntWeapon(b, it.k); b.mag = WEAPONS[it.k].mag; } } b.lootTarget = null; b.path = null; b.waitT = 0; } }
+  const w = WEAPONS[b.weapon]; if (w.melee) { const t = b.target; if (t && t.alive && b.targetVis && now > (b.nextMelee || 0)) { const dx = t.pos.x - b.pos.x, dz = t.pos.z - b.pos.z, d = Math.hypot(dx, dz); if (d < 2.3) { b.nextMelee = now + 1.0; b.atkAnim = .32; hurt(t, 18, b, 'knife', 'chest', { x: dx / d, y: 0, z: dz / d }, { x: t.pos.x, y: t.pos.y + 1.1, z: t.pos.z }); SFX.swish(); } } if (b.inv[1] || b.inv[2]) botSwapWeapon(b); }
+  else if (b.mag <= 0 && b.reloadT <= 0 && !botCanReload(b, w)) botSwapWeapon(b);
+}
+
+/* ---------- riding: steer the motorcycle along the coarse route, probe for walls and water, dismount near the target ---------- */
+function vehNearest(b, type, R) { let best = null, bd = R; for (const v of VEH.list) { if (v.type !== type || v.driver || v.dead || v.flipped || v.hp <= 0 || MAP.terrainY(v.pos.x, v.pos.z) < MAP.sea) continue; const d = Math.hypot(v.pos.x - b.pos.x, v.pos.z - b.pos.z); if (d < bd) { bd = d; best = v; } } return best; }
+/* roads are polylines; a ride that starts and ends near one follows its vertices instead of cutting across the hills */
+const ROADG = { nodes: null };
+function roadGraph() { if (ROADG.nodes) return ROADG.nodes; const N = []; MAP.roads.forEach((P, r) => P.forEach((p, i) => N.push({ x: p[0], z: p[1], r, i, adj: [] }))); for (let a = 0; a < N.length; a++) for (let c = a + 1; c < N.length; c++) { const A = N[a], C = N[c], d = Math.hypot(A.x - C.x, A.z - C.z); if ((A.r === C.r && Math.abs(A.i - C.i) === 1) || d < 14) { A.adj.push([c, d]); C.adj.push([a, d]); } } return ROADG.nodes = N; }
+function roadRoute(fx, fz, tx, tz) { const N = roadGraph(); if (!N.length) return null; let s = -1, t = -1, ds = 30, dt = 45; N.forEach((n, i) => { const a = Math.hypot(n.x - fx, n.z - fz), c = Math.hypot(n.x - tx, n.z - tz); if (a < ds) { ds = a; s = i; } if (c < dt) { dt = c; t = i; } }); if (s < 0 || t < 0 || s === t) return null;
+  const dist = new Array(N.length).fill(Infinity), prev = new Array(N.length).fill(-1), done = new Array(N.length).fill(false); dist[s] = 0; for (let k = 0; k < N.length; k++) { let u = -1; for (let i = 0; i < N.length; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i; if (u < 0 || dist[u] === Infinity) break; done[u] = true; if (u === t) break; for (const [v, w] of N[u].adj) if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; prev[v] = u; } }
+  if (dist[t] === Infinity) return null; const pts = []; for (let u = t; u !== s; u = prev[u]) pts.push({ x: N[u].x, z: N[u].z }); pts.reverse(); if (ds > 10) pts.unshift({ x: N[s].x, z: N[s].z }); return pts; }
+function botDrive(b, dt) {
+  const v = b.veh, now = G.now, tgt = b.driveTarget || { x: ZONE.white.x, z: ZONE.white.z }, dx = tgt.x - v.pos.x, dz = tgt.z - v.pos.z, dist = Math.hypot(dx, dz);
+  const arrived = dist < 14, zoneOk = ZONE.on && insideWhite(v.pos.x, v.pos.z, 12) && dist < 40;
+  if (now > (b.drvChkT || 0)) { b.drvChkT = now + 3; if (b.drvBest === undefined || dist < b.drvBest - 3) { b.drvBest = dist; b.drvProgT = now; } }
+  if (arrived || zoneOk || b.driveStuck > 5 || now - (b.drvProgT || now) > 9 || b.hp < 20 || v.hp <= 0) { vehExit(b); b.path = null; b.waitT = 0; b.rot = arrived && b.afterRide ? { x: b.afterRide.x, z: b.afterRide.z } : null; b.rotPh = ZONE.ph; b.rotT = now + 20; b.afterRide = null; b.wantVeh = null; b.wantVehT = 0; b.noVehT = now + 40; b.intent = '下车'; animSoldier(b, dt); return; }
+  if (b.roadPts === undefined) b.roadPts = roadRoute(v.pos.x, v.pos.z, tgt.x, tgt.z); while (b.roadPts && b.roadPts.length && Math.hypot(b.roadPts[0].x - v.pos.x, b.roadPts[0].z - v.pos.z) < 10) b.roadPts.shift();
+  if (!b.driveWp || Math.hypot(b.driveWp.x - v.pos.x, b.driveWp.z - v.pos.z) < 9 || now > (b.driveWpT || 0)) { const rp = b.roadPts && b.roadPts.length ? b.roadPts[0] : null; if (rp) b.driveWp = rp; else { const r = routeToward(v.pos.x, v.pos.z, tgt.x, tgt.z, 34); b.driveWp = r || tgt; } b.driveWpT = now + 2.5; }
+  const wp = b.driveWp, want = Math.atan2(-(wp.x - v.pos.x), -(wp.z - v.pos.z)), da = angDiff(want, v.yaw);
+  // probes ignore the ground itself (slopes) but treat water and steep rises ahead as walls
+  const probe = (ang, len) => { const fx = -Math.sin(v.yaw + ang), fz = -Math.cos(v.yaw + ang), rx = Math.cos(v.yaw + ang), rz = -Math.sin(v.yaw + ang); let t = len; for (const o of [-v.t.hw - .05, 0, v.t.hw + .05]) { const h = rayWorld(v.pos.x + rx * o, v.pos.y + .55, v.pos.z + rz * o, fx || 1e-9, .04, fz || 1e-9, len); if (h && h.s && h.t < t) t = h.t; } for (let q = 3; q <= Math.min(t, 10); q += 3) { const wx = v.pos.x + fx * q, wz = v.pos.z + fz * q, ty = MAP.terrainY(wx, wz); if (ty < MAP.sea - .2 || ty - v.pos.y > q * .55) { t = Math.min(t, q); break; } } return t; };
+  const big = v.t.len > 1.5, f = probe(0, big ? 12 : 9), l = probe(.6, big ? 9 : 7), r = probe(-.6, big ? 9 : 7); let steer = clamp(-da * 1.8, -1, 1), acc = Math.abs(da) > 1.2 ? .3 : Math.abs(da) > .5 ? .55 : 1; if (Math.abs(steer) > .5 && Math.abs(v.speed) > (big ? 8 : 12)) acc = Math.min(acc, -.3); if (big && Math.abs(v.speed) > 13) acc = Math.min(acc, 0); if (Math.hypot(wp.x - v.pos.x, wp.z - v.pos.z) < 16 && Math.abs(v.speed) > 9) acc = Math.min(acc, .2);
+  if (f < 8) { steer = l >= r ? -1 : 1; acc = f < 2.5 ? -.5 : .45; } else if (l < 3.5) steer = Math.max(steer, .6); else if (r < 3.5) steer = Math.min(steer, -.6);
+  if (((f < 4 && l < 4.5 && r < 4.5) || (Math.abs(da) > 1.9 && f < 7)) && (b.reverseT || 0) < now - .8 && Math.abs(v.speed) < 4) b.reverseT = now + 1.5;   // boxed in on three sides: back out before trying again
+  if ((b.reverseT || 0) > now) { acc = -1; steer = da > 0 ? 1 : -1; } if (Math.abs(v.speed) < .6 && acc > 0) { b.driveStuck += dt; if (b.driveStuck > 1.0 && (b.reverseT || 0) < now - .5) { b.reverseT = now + 1.3; b.driveStuck = .2; } } else if (Math.abs(v.speed) > 2) b.driveStuck = Math.max(0, b.driveStuck - dt * .6);
+  b.drive = { acc, steer: clamp(steer, -1, 1) }; b.driveDbg = [+f.toFixed(1), +l.toFixed(1), +r.toFixed(1), +da.toFixed(2)]; b.yaw = v.yaw; b.intent = '骑行'; animSoldier(b, dt); ridePose(b, v);
+}
