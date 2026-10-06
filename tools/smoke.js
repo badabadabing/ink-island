@@ -21,7 +21,9 @@ const server = http.createServer((q, r) => { let f = path.join(ROOT, decodeURICo
     out.loot = { spots: LOOT.spots.length, items: LOOT.items.length };
     out.unreachable = TOWNS.filter(t => !MAP.reach[navSnap(t.x, t.z + 8)]).map(t => t.id); out.pathsFromArmory = TOWNS.slice(1).map(t => { G.frameNo = (G.frameNo || 0) + 1; const r = routeToward(TOWNS[0].x, TOWNS[0].z + 20, t.x, t.z); const p = r && navPath(TOWNS[0].x, TOWNS[0].z + 20, r.x, r.z); return [t.id, !!p]; });
     out.landed = G.bots.filter(b => b.landT !== undefined).length;
-    let badSpots = 0; for (const sp of LOOT.spots) { const onFloor = MAP.floorAtY(sp.x, sp.z, sp.y), c = navSnap(sp.x, sp.z); if (!(onFloor || (MAP.reach[c] && Math.abs(MAP.fh[c] - sp.y) < 1.2))) badSpots++; } out.badSpots = badSpots;
+    const W = MAP.W; let badSpots = 0; for (const sp of LOOT.spots) { const F = MAP.floorAtY(sp.x, sp.z, sp.y); if (F) { let f = F, ok = false; for (let k = 0; k < 6 && f; k++) { const c = navSnap(f.bottom.x, f.bottom.z); if (MAP.reach[c] && Math.abs(MAP.fh[c] - f.bottom.y) < 1.2) { ok = true; break; } f = MAP.floorAtY(f.bottom.x, f.bottom.z, f.bottom.y); } if (!ok) badSpots++; continue; } const c0 = navIdx(sp.x, sp.z); let ok = false; for (let dz = -2; dz <= 2 && !ok; dz++) for (let dx = -2; dx <= 2; dx++) { const c = c0 + dx + dz * W; if (MAP.reach[c] && Math.abs(MAP.fh[c] - sp.y) < 1.5) { ok = true; break; } } if (!ok) badSpots++; } out.badSpots = badSpots;
+    out.ladders = MAP.ladders.length; out.ladderFeet = MAP.ladders.filter(l => !MAP.reach[navIdx(l.x, l.z)]).map(l => [l.x, l.z]);
+    out.sealed = []; for (const b of MAP.buildings) { let tot = 0, ok = 0; for (let x = Math.floor(b.x1) + 1; x < b.x2 - .5; x++) for (let z = Math.floor(b.z1) + 1; z < b.z2 - .5; z++) { const c = navIdx(x + .5, z + .5); tot++; if (MAP.reach[c] && Math.abs(MAP.fh[c] - b.y0) < .7) ok++; } const d = b.door, dx = d.side === 'N' || d.side === 'S' ? (d.at === null ? (b.x1 + b.x2) / 2 : d.at + .7) : (d.side === 'W' ? b.x1 + .7 : b.x2 - .7), dz = d.side === 'W' || d.side === 'E' ? (d.at === null ? (b.z1 + b.z2) / 2 : d.at + .7) : (d.side === 'N' ? b.z1 + .7 : b.z2 - .7); const pct = Math.round(ok / Math.max(1, tot) * 100); if (!MAP.reach[navIdx(dx, dz)] || pct < 25) out.sealed.push([b.kind, Math.round(b.x1), Math.round(b.z1), d.side, pct]); } out.buildings = MAP.buildings.length;
     return out;
   });
   await browser.close(); server.close();
@@ -33,7 +35,9 @@ const server = http.createServer((q, r) => { let f = path.join(ROOT, decodeURICo
   if (res.match.firstMinuteDeaths > 12) fails.push('first minute too lethal: ' + res.match.firstMinuteDeaths);
   if (res.loot.items < 150) fails.push('too little loot: ' + res.loot.items);
   if (res.landed !== 23) fails.push('bots that landed: ' + res.landed);
-  if (res.badSpots > 5) fails.push('loot spots bots cannot reach: ' + res.badSpots);
+  if (res.badSpots > 4) fails.push('loot spots bots cannot reach: ' + res.badSpots);
+  if (res.ladderFeet.length) fails.push('ladder feet on unreachable cells: ' + JSON.stringify(res.ladderFeet));
+  if (res.sealed.length) fails.push('sealed buildings (door cell unreachable or interior < 25%): ' + JSON.stringify(res.sealed));
   if (res.pathsFromArmory.some(p => !p[1])) fails.push('routing failed: ' + res.pathsFromArmory.filter(p => !p[1]).map(p => p[0]));
   console.log(JSON.stringify(res, null, 2));
   if (fails.length) { console.error('\nSMOKE FAIL\n- ' + fails.join('\n- ')); process.exit(1); } console.log('\nSMOKE OK');

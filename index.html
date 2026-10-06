@@ -63,21 +63,38 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 #meds{position:absolute;left:18px;bottom:88px;display:flex;gap:6px;font-size:11px}
 #meds span{padding:2px 7px;border:1.5px solid var(--ink);background:rgba(245,242,234,.85);opacity:.45} #meds span.have{opacity:1} #meds b{margin-left:3px}
 #crate{z-index:5}
-#crate .panel{min-width:360px;text-align:left}
+#crate .panel{min-width:460px;max-width:94vw;text-align:left} #crateList{max-height:56vh;margin-bottom:6px} #crate h2{letter-spacing:3px} #crateT2{font-size:12px;opacity:.75;margin:-4px 0 8px;min-height:16px} #crate .it button{padding:6px 12px;font-size:12px}
 #crate h2{text-align:center}
 #crate table{width:100%;border-collapse:collapse;font-size:13px}
 #crate td{padding:5px 8px;border-bottom:1px solid rgba(22,22,28,.2)} #crate td:last-child{text-align:right}
 #crate td button{padding:2px 10px;font-size:11px;letter-spacing:0}
 #inv{z-index:5}
-#pause{background:transparent;justify-content:flex-start;align-items:flex-start}
-#pause .panel{margin:18vh 0 0 24px;min-width:200px;padding:18px 22px;box-shadow:4px 4px 0 rgba(22,22,28,.9)}
-#pause h2{font-size:20px;margin-bottom:4px}
-#pause p{margin-bottom:10px}
-#pause .btns{flex-direction:column;gap:6px}
-#pause button{padding:7px 14px;font-size:12px}
-#inv .panel{min-width:420px;max-width:92vw;text-align:left}
-.invCols{display:flex;gap:22px;align-items:flex-start} .invCols>div{flex:1;min-width:0} .invCols>div:last-child{flex:.8} #inv h3{font-size:11px;letter-spacing:4px;margin:4px 0 6px;opacity:.7} #inv tr[draggable]{cursor:grab} #inv table.over{outline:2px dashed var(--blue);outline-offset:4px} #inv td.empty{opacity:.5;text-align:left!important}
-#end{background:transparent;justify-content:flex-end;align-items:flex-end;padding:0 28px 28px 0} #end .panel{min-width:420px;max-width:520px;background:rgba(245,242,234,.94)} #end h2{font-size:24px;letter-spacing:4px;white-space:nowrap} #endPose{font-size:11px;letter-spacing:3px;color:var(--blue);margin-top:4px} #endHist{display:block;width:100%;height:96px;margin:0 0 12px;border-top:1px solid rgba(22,22,28,.2);padding-top:6px}
+#pause{background:rgba(245,242,234,.35)}
+#pause .panel{min-width:0;width:min(380px,94vw);padding:18px 22px;text-align:left;box-shadow:4px 4px 0 rgba(22,22,28,.9)}
+#pause h2{font-size:22px;margin-bottom:2px}
+#pause p{margin-bottom:8px;font-size:12px}
+#pause .btns{flex-direction:column;gap:6px;align-items:stretch}
+#pause button{padding:9px 14px;font-size:12px}
+#pause .note{font-size:11px;color:var(--red);margin:6px 0 0;text-align:center} #pauseSet .devSet{margin:4px 0 10px;display:block} #pauseSet h3{font-size:11px;letter-spacing:4px;opacity:.7;margin:4px 0 6px}
+#touch.dim{opacity:.25;pointer-events:none}
+#inv .panel.invP{min-width:980px;max-width:96vw;text-align:left;padding:16px 22px 14px}
+.invHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px} .invHead h2{margin:0} .cnt{font-size:11px;letter-spacing:1px;opacity:.75;float:right} #invCap.full{color:var(--red);opacity:1}
+.invTabs{display:none;gap:0} .invTabs button{padding:6px 14px;font-size:12px;border-right-width:0} .invTabs button:last-child{border-right-width:2px} .invTabs button.sel{background:var(--ink);color:var(--paper)}
+.invCols3{display:grid;grid-template-columns:1fr 1.05fr 1.35fr;gap:18px;align-items:start} .invCol{min-width:0} #inv h3{font-size:11px;letter-spacing:4px;margin:2px 0 6px;opacity:.7}
+.invList{max-height:56vh;overflow:auto;border-top:1px solid rgba(22,22,28,.2);scrollbar-width:thin;scrollbar-color:var(--ink) transparent;-webkit-mask-image:linear-gradient(#000 calc(100% - 18px),transparent)} .invList::-webkit-scrollbar{width:4px} .invList::-webkit-scrollbar-thumb{background:var(--ink)} #invCapBar{height:8px;background:rgba(22,22,28,.12);margin:0 0 6px;background-image:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(22,22,28,.45) calc(25% - 1px) 25%)} #invCapBar i{display:block;height:100%;background:var(--ink)} #invCapBar.full i{background:var(--red)}
+.key{display:inline-block;width:15px;height:15px;line-height:13px;text-align:center;border:1px solid var(--ink);font-size:9px;margin-right:4px;vertical-align:1px} .up{display:inline-block;font-size:9px;letter-spacing:1px;color:var(--paper);background:var(--red);padding:0 4px;margin-left:4px;vertical-align:1px} .more{border-width:1.5px;padding:1px 6px;font-size:11px;margin-left:4px;opacity:.75} .it .sub{display:none;margin-top:3px} .it.open .sub{display:block} .it.open .more{background:var(--ink);color:var(--paper)}
+body.dragG #invBag,body.dragG #invGear .slot.empty,body.dragG #invGear .gcard.empty{outline:2px dashed var(--blue);outline-offset:3px} body.dragB #invG{outline:2px dashed var(--blue);outline-offset:3px} body.dragG #invG,body.dragB #invBag,body.dragB #invGear{opacity:.5}
+.it{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid rgba(22,22,28,.14);cursor:grab} .it img{width:44px;height:44px;object-fit:contain;background:rgba(22,22,28,.04);border:1px solid rgba(22,22,28,.28);flex:none} .it.gun img{width:96px;height:36px} .itT{flex:1;min-width:0;font-size:12px;line-height:1.3} .itT b{display:block;font-weight:600} .itT small{opacity:.65;font-size:10.5px} .itB{flex:none;white-space:nowrap}
+.invList .empty,#invBag .empty{padding:14px 4px;font-size:11px;opacity:.55;letter-spacing:1px}
+.slot{position:relative;display:flex;align-items:center;gap:10px;border:1.5px solid var(--ink);padding:8px 10px 8px 12px;margin-bottom:8px;cursor:grab;background:rgba(245,242,234,.6)} .slot.cur{box-shadow:3px 3px 0 var(--ink)} .slot.empty{border-style:dashed;opacity:.6;cursor:default} .slot.small{padding:5px 10px 5px 12px} .sn{position:absolute;top:-8px;left:8px;background:var(--paper);padding:0 4px;font-size:10px;letter-spacing:2px} .slot .gunIco{width:120px;height:44px;object-fit:contain;flex:none} .sT{flex:1;min-width:0;font-size:12px} .sT b{display:block} .sT small{opacity:.65;font-size:10.5px} .sEmpty{font-size:11px;opacity:.7;padding:10px 0}
+.chips{margin-top:4px} .chip{display:inline-block;font-size:10px;padding:1px 6px;border:1px solid rgba(22,22,28,.55);margin:2px 3px 0 0;cursor:pointer;background:var(--paper)} .chip.empty{border-style:dashed;opacity:.45;cursor:default}
+.gear4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 8px} .gcard{border:1px solid rgba(22,22,28,.4);padding:6px 4px;text-align:center;font-size:11px;min-height:96px;cursor:grab;background:rgba(245,242,234,.6)} .gcard img{width:46px;height:46px;object-fit:contain;display:block;margin:0 auto 2px} .gcard b{display:block;font-weight:600} .gcard small{display:block;opacity:.6;font-size:10px;margin-bottom:3px} .gcard.empty{border-style:dashed;opacity:.5;cursor:default;display:flex;flex-direction:column;justify-content:center} .gcard button{margin:0}
+.vitals{position:relative;height:16px;border:1px solid var(--ink);margin-top:6px;font-size:10px;letter-spacing:1px} .vitals i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);opacity:.85} .vitals.boost i{background:var(--amber)} .vitals span{position:absolute;left:6px;top:1px;z-index:1;mix-blend-mode:difference;color:var(--paper)}
+.invHint{text-align:center;margin-top:10px;font-size:11px;opacity:.7} #inv .over{outline:2px dashed var(--blue);outline-offset:3px} #inv button.pri{background:var(--ink);color:var(--paper)}
+body.touch #inv .panel.invP{min-width:0;width:97vw;padding:8px 12px 6px} body.touch .invHead h2{font-size:18px;letter-spacing:3px} body.touch .invTabs{display:flex} body.touch .invCols3{grid-template-columns:1fr 1.15fr;gap:10px} body.touch #colB{display:none} body.touch #inv.tabB #colB{display:block} body.touch #inv.tabB #colG{display:none} body.touch .invList{max-height:62vh} body.touch .slot .gunIco{width:80px;height:30px} body.touch .it button,body.touch .slot button,body.touch .gcard button{min-height:36px;padding:6px 10px} body.touch .itT b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} body.touch .gear4{grid-template-columns:repeat(4,1fr)} body.touch .invHint{display:none} body.touch .chips .chip{font-size:9px;padding:0 4px}
+#end{background:transparent;justify-content:flex-end;align-items:center;padding:0 28px 0 0} #end .panel{min-width:420px;max-width:520px;max-height:92vh;overflow:auto;background:rgba(245,242,234,.94)} #end h2{font-size:24px;letter-spacing:4px;white-space:nowrap} #end .btns,#dead .btns{position:sticky;bottom:0;background:rgba(245,242,234,.96);padding-top:8px}
+#endStats .kv,#deadStats .kv{display:flex;justify-content:space-between;gap:12px} #endStats .kv b,#deadStats .kv b{font-weight:600;opacity:.75} #endStats .kl,#deadStats .kl{font-size:11px;opacity:.75;padding-left:10px}
+body.touch #end{justify-content:center;padding:0} body.touch #end .panel,body.touch #dead .panel{min-width:0;width:94vw;max-height:88vh;padding:14px 16px} body.touch #end h2{font-size:18px;white-space:normal} #endPose{font-size:11px;letter-spacing:3px;color:var(--blue);margin-top:4px} #endHist{display:block;width:100%;height:96px;margin:0 0 12px;border-top:1px solid rgba(22,22,28,.2);padding-top:6px}
 #endStats{font-size:13px;line-height:1.9;text-align:left;margin:6px 0 14px;border-top:1px solid rgba(22,22,28,.2);padding-top:10px}
 #inv h2{text-align:center}
 #inv table{width:100%;border-collapse:collapse;font-size:13px}
@@ -107,21 +124,23 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .ov h2{font-size:30px;letter-spacing:6px;margin-bottom:10px}
 .ov p{font-size:13px;line-height:1.8;margin-bottom:18px;opacity:.8}
 .ov .btns{display:flex;gap:10px;justify-content:center}
-#menu{background:var(--paper)}
-#menu .panel{min-width:420px}
-#menu h1{font-size:64px;letter-spacing:4px;line-height:.95}
-#menu h1 span{color:var(--red)}
-#menu .sub{font-size:14px;letter-spacing:8px;margin:6px 0 18px}
-#menu .tag{font-size:11px;letter-spacing:2px;opacity:.6;margin-bottom:18px}
-.opt{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:12px;letter-spacing:1px}
-.opt label{width:92px;text-align:left;opacity:.8}
-.opt input[type=range]{flex:1;accent-color:var(--ink)}
-.seg{display:flex;flex:1}
-.seg button{flex:1;padding:8px 0;font-size:12px;letter-spacing:1px;border-right-width:0}
-.seg button:last-child{border-right-width:2px}
-.seg button.sel{background:var(--ink);color:var(--paper)}
-#menu .btns{margin-top:18px}
-#menu .foot{font-size:11px;line-height:1.8;opacity:.6;margin-top:14px}
+#menu{background:rgba(245,242,234,.42)}
+#menu .panel.menuP{display:grid;grid-template-columns:1.05fr 1fr;gap:34px;min-width:0;width:min(960px,94vw);max-height:94vh;overflow:auto;text-align:left;padding:30px 36px 26px;position:relative}
+#menu h1{font-size:64px;letter-spacing:4px;line-height:.95;margin:0} #menu h1 span{color:var(--red)} #menu .sub{font-size:14px;letter-spacing:8px;margin:6px 0 10px} #menu .tag{font-size:11px;letter-spacing:2px;opacity:.65;margin-bottom:10px}
+.lastLine{font-size:12px;letter-spacing:1px;opacity:.85;min-height:18px;margin:0 0 14px} .lastLine b{color:var(--red)}
+#menu .btns{justify-content:flex-start;margin:0 0 10px} button.cta{padding:16px 30px;font-size:17px;letter-spacing:4px;min-width:300px}
+.menuLinks{display:flex;gap:14px;margin-bottom:16px} button.lnk{border:none;padding:4px 0;font-size:12px;letter-spacing:2px;text-decoration:underline;text-underline-offset:4px;background:transparent}
+.brainCard{border:1.5px solid var(--ink);padding:10px 12px;font-size:12px;line-height:1.75;position:relative;background:rgba(245,242,234,.7)} .brainCard h4{font-size:10px;letter-spacing:4px;opacity:.65;margin:0 0 4px} .brainCard .kv{display:flex;justify-content:space-between;gap:10px} .brainCard .kv b{font-weight:600} .brainCard .kv .v{color:var(--blue)} .brainCard button{position:absolute;top:8px;right:8px;padding:2px 8px;font-size:10px;letter-spacing:1px;border-width:1.5px}
+#menu h3{font-size:11px;letter-spacing:4px;opacity:.7;margin:4px 0 8px}
+.cardRow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px} .cardRow.two{grid-template-columns:repeat(2,1fr)} .cardRow button{padding:10px 8px;text-align:left;letter-spacing:1px;line-height:1.35;background:rgba(245,242,234,.75)} .cardRow button b{display:block;font-size:14px} .cardRow button small{font-size:10px;opacity:.65;display:block} .cardRow button.sel{background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 rgba(22,22,28,.5)} .cardRow button.sel small{opacity:.8}
+.devSet{margin-top:10px;border-top:1px solid rgba(22,22,28,.2);padding-top:8px}
+.opt{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:12px;letter-spacing:1px;min-height:34px} .opt label{width:72px;text-align:left;opacity:.8} .opt .val{width:34px;text-align:right;font-variant-numeric:tabular-nums;opacity:.8}
+.opt input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:22px;background:transparent} .opt input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink)} .opt input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-8px;background:var(--paper);border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(22,22,28,.6)}
+.seg{display:flex;flex:1} .seg button{flex:1;padding:8px 0;font-size:12px;letter-spacing:1px;border-right-width:0} .seg button:last-child{border-right-width:2px} .seg button.sel{background:var(--ink);color:var(--paper)}
+.ctaBar{display:none} .phoneOnly{display:none}
+#keys .panel.keysP{min-width:0;width:min(820px,94vw);text-align:left;padding:24px 30px} .keysCols{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin:6px 0 16px} .keysCols h3{font-size:11px;letter-spacing:4px;opacity:.7;margin:6px 0 4px} .keysCols p{font-size:12.5px;line-height:1.9;margin:0;opacity:.9}
+@media (max-width:900px){#menu .panel.menuP{grid-template-columns:1fr;gap:12px;padding:18px 18px 76px;width:96vw;max-height:96vh} #menu h1{font-size:40px} .menuLinks{margin-bottom:8px} .ctaBar{display:block;position:sticky;bottom:-76px;left:0;right:0;margin:0 -18px -76px;padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:2px solid var(--ink)} .ctaBar button.cta{width:100%;min-width:0;padding:14px} .menuL .btns{display:none} .phoneOnly{display:inline-block} .desktopOnly{display:none} .devSet{display:none} .devSet.open{display:block} .keysCols{grid-template-columns:1fr}}
+body.touch .desktopOnly{display:none}
 #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--paper);z-index:9}
 #loading b{font-size:34px;letter-spacing:6px} #loading span{font-size:12px;letter-spacing:3px;opacity:.6}
 /* phone layer: paper buttons on the right thumb, a stick that appears where the left thumb lands */
@@ -146,7 +165,7 @@ body.touch #top div{min-width:84px;padding:3px 8px} body.touch #top b{font-size:
 body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch #ammoBox{transform:scale(.8);transform-origin:right bottom}
 body.touch #gear{top:90px;bottom:auto;left:50%;right:auto;transform:translateX(-50%)}
 body.touch .ov .panel{padding:18px 20px;min-width:0;max-width:94vw;max-height:92vh;overflow:auto}
-body.touch #inv .panel,body.touch #crate .panel{min-width:0;width:min(94vw,520px)}
+body.touch #crate .panel{min-width:0;width:min(94vw,520px)}
 body.touch #pause .panel{margin:12vh 0 0 16px}
 body.touch #bigmap canvas{width:min(78vh,86vw)!important;height:min(78vh,86vw)!important}
 </style>
@@ -159,7 +178,7 @@ body.touch #bigmap canvas{width:min(78vh,86vw)!important;height:min(78vh,86vw)!i
 <div id="flashOv"></div><div id="smokeOv"></div><div id="weatherOv"></div>
 
 <div id="hud">
-  <div id="top"><div><b id="alive">24</b><small>存活</small></div><div><b id="timer">—</b><small id="phase">阶段 1</small></div><div><b id="kills">0</b><small>击倒</small></div></div>
+  <div id="top"><div><b id="alive">24</b><small>存活</small></div><div><b id="timer">—</b><small id="phase">阶段 1</small></div><div><b id="kills">0</b><small>击杀</small></div></div>
   <div id="radarBox"><canvas id="radar" width="176" height="176"></canvas><div id="zone"></div></div>
   <div id="feed"></div>
   <div id="hpBox"><div class="stat"><div id="boostBox" hidden class="bar" style="height:5px;margin-bottom:3px;border-color:var(--amber)"><i id="boostBar" style="width:0;background:var(--amber)"></i></div><div class="row"><span class="big" id="hp">100</span><span class="lab">生命 HP</span></div><div class="bar"><i id="hpBar" style="width:100%"></i></div></div>
@@ -177,24 +196,41 @@ body.touch #bigmap canvas{width:min(78vh,86vw)!important;height:min(78vh,86vw)!i
 </div>
 <button id="captureMouse" class="pri" hidden>点击进入鼠标控制</button>
 
-<div id="menu" class="ov on"><div class="panel">
-  <h1 class="hand">INK<br><span>ISLAND</span></h1><div class="sub">墨 岛</div>
-  <div class="tag">640 m 小岛 · 九处据点 · 单人对 Bot</div>
-  <div class="opt"><label>对手</label><div id="optDiff" class="seg"><button data-v="0">新兵</button><button data-v="1">老兵</button><button data-v="2">精英</button></div></div>
-  <div class="opt"><label>人数</label><div id="optBots" class="seg"><button data-v="11">12 人</button><button data-v="23">24 人</button></div></div>
-  <div class="opt"><label>鼠标</label><div id="optAim" class="seg"><button data-v="mouse">鼠标</button><button data-v="trackpad">触控板</button></div></div>
-  <div class="opt"><label>画质</label><div id="optQ" class="seg"><button data-v="low">省电</button><button data-v="balanced">均衡</button><button data-v="high">精细</button></div></div>
-  <div class="opt"><label>灵敏度 <span id="sSensV"></span></label><input id="sSens" type="range" min="0.3" max="3" step="0.1"></div>
-  <div class="opt"><label>音量 <span id="sVolV"></span></label><input id="sVol" type="range" min="0" max="1" step="0.05"></div>
-  <div class="btns"><button id="start" class="pri">起飞</button></div>
-  <p id="brainFoot" class="foot"></p>
-  <p class="foot">落地先找枪。白圈是下一圈，蓝圈外会持续掉血。F 拾取 · TAB 背包 · M 全图</p>
+<div id="menu" class="ov on"><div class="panel menuP">
+  <div class="menuL">
+    <h1 class="hand">INK<br><span>ISLAND</span></h1><div class="sub">墨 岛</div>
+    <div class="tag">640 m 纸岛 · 九处据点 · 你对 23 个会记仇的 Bot</div>
+    <p id="lastLine" class="lastLine"></p>
+    <div class="btns"><button id="start" class="pri cta">起飞 · 开始一局</button></div>
+    <div class="menuLinks"><button id="keysBtn" class="lnk">操作说明</button><button id="setBtn" class="lnk phoneOnly">设置</button></div>
+    <div id="brainCard" class="brainCard"></div>
+  </div>
+  <div class="menuR">
+    <h3>这一局</h3>
+    <div class="cardRow" id="optDiff"><button data-v="0"><b>新兵</b><small>反应慢 · 不会绕后</small></button><button data-v="1"><b>老兵</b><small>会找掩体 · 会包扎</small></button><button data-v="2"><b>精英</b><small>会跟跳 · 会守圈</small></button></div>
+    <div class="cardRow two" id="optBots"><button data-v="11"><b>12 人</b><small>约 6 分钟</small></button><button data-v="23"><b>24 人</b><small>约 9 分钟</small></button></div>
+    <div id="devSet" class="devSet">
+      <h3>设备</h3>
+      <div class="opt desktopOnly"><label>瞄准设备</label><div id="optAim" class="seg"><button data-v="mouse">鼠标</button><button data-v="trackpad">触控板</button></div></div>
+      <div class="opt"><label>画质</label><div id="optQ" class="seg"><button data-v="low">省电</button><button data-v="balanced">均衡</button><button data-v="high">精细</button></div></div>
+      <div class="opt"><label>灵敏度</label><input id="sSens" type="range" min="0.3" max="3" step="0.1"><span id="sSensV" class="val"></span></div>
+      <div class="opt"><label>音量</label><input id="sVol" type="range" min="0" max="1" step="0.05"><span id="sVolV" class="val"></span></div>
+    </div>
+    <p id="brainFoot" class="foot" hidden></p>
+  </div>
+  <div class="ctaBar phoneOnly"><button id="startM" class="pri cta">起飞 · 开始一局</button></div>
 </div></div>
+<div id="keys" class="ov"><div class="panel keysP"><h2>操 作</h2><div class="keysCols">
+  <div><h3>移动</h3><p>WASD 移动 · Shift 冲刺 · X 静步<br>C 按住蹲 · Z 趴下 · 空格 跳 / 攀爬 / 翻窗<br>Q / E 探头 · Alt 自由视角</p></div>
+  <div><h3>射击</h3><p>左键 开火 · 右键按住 瞄准（开镜）<br>R 换弹 · B 单发 / 连发 · 1 2 3 切枪<br>4 投掷物 · G 直接投掷</p></div>
+  <div><h3>物资</h3><p>F 拾取 / 上车 / 开箱 / 扶正<br>TAB 背包（可拖拽）· 7 8 9 0 - = 用药<br>空投琥珀烟 · 阵亡者留下箱子</p></div>
+  <div><h3>界面</h3><p>M 全图（左键标记 · 右键清除）<br>ESC 暂停 · 阵亡后可回放最后 8 秒<br>手机：左半屏摇杆 · 右半屏转视角</p></div>
+</div><div class="btns"><button id="keysClose" class="pri">知道了</button></div></div></div>
 <div id="bigmap" class="ov"><div class="panel" style="padding:12px"><canvas id="bigMapC" width="900" height="900" style="display:block;width:min(86vh,86vw);height:min(86vh,86vw)"></canvas><div style="font-size:11px;letter-spacing:2px;margin-top:8px;text-align:center">M 关闭 · 640 × 640 m</div></div></div>
-<div id="inv" class="ov"><div class="panel"><h2>背 包</h2><div class="invCols"><div><h3>身 上</h3><table id="invT"></table></div><div><h3>脚 下</h3><table id="invG"></table></div></div><p style="text-align:center;margin-top:14px">TAB 关闭 · 拖拽：脚下→身上 拾取，身上→脚下 丢弃 · 7-0 - = 用药 · 弹药可拆半</p></div></div>
-<div id="end" class="ov"><div class="panel"><h2 id="endT">墨尽纸白 · 岛上只剩你</h2><p id="endS"></p><p id="endPose" class="pose"></p><div id="endStats"></div><canvas id="endHist" width="380" height="96"></canvas><div class="btns"><button id="endAgain" class="pri">再来一局</button></div></div></div>
-<div id="crate" class="ov"><div class="panel"><h2 id="crateT">箱子</h2><p id="crateT2"></p><table id="crateList"></table><div class="btns" style="margin-top:12px"><button id="crateAll" class="pri">全部拿取</button><button id="crateClose">关闭 (F)</button></div></div></div>
-<div id="pause" class="ov"><div class="panel"><h2>暂停</h2><p>ESC 继续</p><div class="btns"><button id="resume" class="pri">继续</button><button id="quit">回到菜单</button></div></div></div>
+<div id="inv" class="ov"><div class="panel invP"><div class="invHead"><h2>背 包</h2><div class="invTabs phoneOnly"><button data-tab="g" class="sel">脚下</button><button data-tab="b">背包</button></div></div><div class="invCols3"><section class="invCol" id="colG"><h3>脚 下 <span id="invGN" class="cnt"></span></h3><div id="invG" class="invList"></div></section><section class="invCol" id="colB"><h3>背 包 <span id="invCap" class="cnt"></span></h3><div id="invCapBar"><i></i></div><div id="invBag" class="invList"></div></section><section class="invCol"><h3>身 上</h3><div id="invGear"></div></section></div><p class="invHint">TAB 关闭 · 拖拽：脚下 ⇄ 背包 / 身上 · F 直接拾取最近的 · 点配件可卸下</p></div></div>
+<div id="end" class="ov"><div class="panel"><h2 id="endT">墨尽纸白 · 岛上只剩你</h2><p id="endS"></p><p id="endPose" class="pose"></p><div id="endStats"></div><canvas id="endHist" width="380" height="96"></canvas><div class="btns"><button id="endAgain" class="pri">再来一局</button><button id="endReplay">回放</button><button id="endMenu">回到菜单</button></div></div></div>
+<div id="crate" class="ov"><div class="panel"><h2 id="crateT">箱子</h2><p id="crateT2"></p><div id="crateList" class="invList"></div><div class="btns" style="margin-top:12px"><button id="crateAll" class="pri">全部拿取</button><button id="crateClose">关闭 (F)</button></div></div></div>
+<div id="pause" class="ov"><div class="panel"><h2>暂停</h2><p id="pauseSum"></p><div id="pauseSet"></div><div class="btns"><button id="resume" class="pri">继续</button><button id="pauseKeys">操作说明</button><button id="quit">回到菜单</button></div><p id="quitNote" class="note" hidden>再按一次确认 · 中途退出按失败记录</p></div></div>
 <div id="dead" class="ov"><div class="panel"><h2 id="deadT">你被淘汰了</h2><p id="deadBy"></p><div id="deadStats"></div><div class="btns"><button id="again" class="pri">再来一局</button><button id="deadReplay">回放</button><button id="deadWatch">看完这局</button></div></div></div>
 
 <div id="touch">
@@ -215,7 +251,7 @@ import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
-const files = ['core', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'lootgeo', 'actors', 'fx', 'br', 'game', 'combat', 'vehicle', 'crate', 'touch', 'replay', 'brain', 'finale'];
+const files = ['core', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'lootgeo', 'actors', 'fx', 'br', 'game', 'combat', 'vehicle', 'ladder', 'crate', 'touch', 'replay', 'brain', 'finale'];
 for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>

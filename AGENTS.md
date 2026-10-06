@@ -25,12 +25,14 @@
 - `js/game.js` 玩家、第三人称相机、HUD、流程、天气、主循环
 - `js/combat.js` 飞行弹丸、投掷物与烟/闪、配件外观、红区、罗盘、地图标记（在 game.js 之后加载，覆盖 fireBullet/throwNade）
 - `js/vehicle.js` 吉普与小艇：模型、驾驶、碰撞、上下车
+- `js/ladder.js` 铁梯攀爬：`MAP.ladders` 登记、玩家 W/S 攀爬、Bot 把屋面当楼层（包装 moveEntity/animSoldier/updatePlayer/updateHUD）
 - `js/brain.js` Bot 跨局记忆（localStorage `inkisland_brain`）：包装 playerFire/hurt/botPlanDrop/startMatch/endMatch/updateHUD，最后加载
 - `js/replay.js` 死亡回放（环形缓冲 + 包装 frame/updateHUD/startMatch）与远处枪声闷响（包装 SFX.shot）
 - `js/finale.js` 结算动作与战绩走势图（最后加载，包装 endMatch/updateCamera/startMatch）
 - `js/touch.js` 手机双拇指触控层（`?touch` 可在桌面强开）；`MAP.lod` 在 island.js，画质档位在 game.js `applyQuality`
 
 ## 硬规则
+- **补丁脚本的替换文本里一个 `//` 都不许出现**（已经第五次把同一行后面的代码吞掉：这次吞掉了 `floor({...})`，全岛二层楼登记消失）。注释一律用 `/* */` 或单独成行。
 - 画风：主体只用 PAPER/INK；颜色仅 RED（血）、AMBER（空投/标记）、BLUE（蓝圈/UI）、GLASS、WOOD。
 - 名称与文案全部原创，不引用其他游戏的地名、枪名、口号。
 - 地形是 2 m 格高度场；导航 1 m 格；建筑盒体 x/z 整数、高度 0.25 m 分级；门宽 ≥ 1.4 m 且位置为整数（细格中心能穿过）。
@@ -61,8 +63,13 @@
 - 2026-10-06 **再次**：替换段如果不是整行，绝不能以 `//` 注释结尾（已经吞掉过 `let tx`、`floor({...})`、`for (let q...)` 三次）。注释只能写在整行末尾或单独一行。
 - 2026-10-05 用字符串替换打补丁时，替换段末尾不要加 `//` 注释——会把同一行后面的代码一起注释掉（撞过一次 `let tx` 消失）。
 - 2026-10-06 新全局名先 grep：`RED` 和核心调色板撞名直接让整页白屏（现在叫 `REDZ`）。
+- 2026-10-06 建筑可达性只能信 `tools/smoke.js` 的建筑登记断言（门格可达 + 室内 ≥ 25 %）和 3×3 邻域的 badSpots；`navSnap` 吸附会把封死屋里的点吸到屋外。新建筑必须 `building({...})` 登记。
+- 2026-10-06 野外选址四条：避树（veg 标记）、建筑间距 ≥ 6 m、门朝落差最小的一面、所有门都走 `doorSteps()`。
 - 2026-10-06 世界生成只能用种子 `R()`，不能用 `pick()`/`Math.random`：野外小屋门向曾用 `pick()`，导致可达性审计每次启动不同、smoke 时好时坏。
 - 2026-10-06 `compat.js` 里有墨线突击的桩对象（曾有 `TOUCH`）；新文件要声明同名 const 时先把桩删掉，重复声明会让该脚本整个不执行。
+- 2026-10-06 补丁脚本里对同一文件只能有一个字符串变量按顺序改（别一边 `rep()` 改缓存一边改局部变量再覆盖——第二十七轮一半改动因此静默丢失，smoke 还是绿的）。
 - 2026-10-06 用脚本打多处补丁时每个锚点都要 assert 唯一；失败要让脚本整体不写回，不然半套补丁落盘很难查。
+- 2026-10-06 `house()` 里新增有条件的 `R()` 调用会让全岛后续随机序列移位（badSpots 7→11 只是因为换了种子序列）：改生成逻辑后 badSpots 变化先用探针列出每个坏点再决定修什么，不要调阈值。
+- 2026-10-06 探针/smoke 报 `scene`/`VM.root` undefined 不一定是 WebGL 坏了：先看 pageerror 列表，往往是世界生成里的 ReferenceError 让 boot 中断。
 - 2026-10-05 地上物品不要用贴图纸片：用户第一眼就说像 2D。所有可见物都要是 Sk 画的纸模。
 - 2026-10-05 从墨线突击继承：国外 CDN 不可靠，一切资源放 `vendor/`；屏幕投影标签先用 `matrixWorldInverse` 判前方；水平面排线掠射角有摩尔纹，`hl()` 用 fwidth 淡出；步态必须由真实位移驱动。
