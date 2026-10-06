@@ -16,6 +16,12 @@ python3 -m http.server 8766
 
 打开 http://localhost:8766 （Chrome / Safari；指针锁定需要真实浏览器）。URL 加 `?auto` 跳过指针锁定（调试用）。
 
+## 线上
+
+- 玩：https://ink-island.pages.dev
+- 仓库：https://github.com/badabadabing/ink-island
+- 发布：`tools/deploy.sh`
+
 ## 操作
 
 手机：左半屏摇杆，右半屏滑动转视角，右侧纸钮开火/瞄准/跳/拾取等；桌面加 `?touch` 可预览触控布局。菜单「画质」省电档适合手机。

@@ -37,7 +37,7 @@
 - 代码保持高密度单行风格，小改动用精确字符串替换，不整文件重排。
 - 新 JS 文件加入 `index.html` 的 `files` 数组（按依赖顺序）。
 - 改完必须：node --check 全过 + 浏览器实际看一眼无报错；流程改动跑 `tools/smoke.js`。
-- 不 commit / 不部署，除非用户要求。
+- 不 commit / 不部署，除非用户要求。用户要求发布时用 `tools/deploy.sh`（GitHub `badabadabing/ink-island` + Cloudflare Pages `ink-island`，https://ink-island.pages.dev）；斑码盒子暂不上（2026-10-06 用户指示）。
 
 ## 从墨线突击带过来的规矩（2026-10-06，见 `~/Desktop/inkstrike/LESSONS-FOR-INK-ISLAND.md`）
 - 背包只有一个真相源：给枪/收枪只走 `invGive`/`invTake`/`invDrop`，禁止直接改 `inv`/`ammo`；`invCheck()` 在拾取/丢弃/每 2 s 校验不变量（槽里的枪必有弹药记录、无孤儿记录、手里的枪在包里），违反即修复并 `console.warn('[INV] …')`，smoke 把它当失败。

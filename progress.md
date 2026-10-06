@@ -236,3 +236,9 @@ Bot 战术（`brain.js`）：
 - 吉普：侧剖面挤出的车斗（低引擎盖、前围台阶、平车厢）、四个轮拱与弧线、门框墨线、带胎纹的辐条轮、竖条格栅、两只圆灯、保险杠、车牌、引擎盖扣与铁锹、倾斜前挡风（玻璃 + 雨刮）、仪表台、倾斜方向盘与换挡杆、两个桶椅 + 后排长椅、防滚架（无篷，能看到车里的人）、尾部备胎、侧挂油桶、天线、红尾灯、排气管、挡泥皮。驾驶座改到左侧，坐姿改为真正坐进去（髋在椅面、腿前伸、手扶方向盘随转向微动）。
 - 小艇：发现旧船体一直是横着挤出的（船体沿 x、附件沿 z）。重做：带舷弧的侧剖面沿航向挤出、四面体船首、两舷三道板缝线、舷缘木条、船首/船尾横梁线、三条横坐板、底板缝、一支斜放的桨、缆绳圈、船首灯杆、舷外机（罩、夹座、舵柄、轴、鳍、三叶螺旋桨）、红色油桶；干舷压低到像小艇而不是木箱。坐姿：坐在后坐板，右手扶舵柄。
 - 验证：三视图拼图截图逐个看过；smoke 通过。
+
+## 发布记录 — 2026-10-06
+- 仓库：https://github.com/badabadabing/ink-island（public，默认分支 main）。首个提交 fadc524，部署脚本提交 1f2a443。
+- Cloudflare Pages 项目 `ink-island`：https://ink-island.pages.dev（本次部署 https://df0dfb3b.ink-island.pages.dev）。只发布 index.html / js / vendor，不发布文档、tools、ref。
+- 验收：线上 index.html、game.js、brain.js、vehicle.js、finale.js 的 SHA-256 与本地 HEAD 一致（在线上页面用 fetch 算的；本机 shell 走不了外网，curl 超时）；线上页面能进菜单、开局、24 人在场、物资刷出、无控制台错误。
+- 以后发布：`tools/deploy.sh`（先 commit，脚本会 node --check、git push、导出干净包、wrangler pages deploy）。斑码盒子暂不上。
