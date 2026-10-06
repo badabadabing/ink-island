@@ -235,7 +235,7 @@ function setWeather(k) { const w = WEATHER[k] || WEATHER.clear; G.weather = k; s
 const WIN_LINES = ['墨尽纸白 · 岛上只剩你', '一笔收山 · 纸上称王', '落笔定局 · 这岛归你了', '笔锋未钝 · 全场封喉', '纸短墨长 · 你是最后一划'];
 function endMatch(win) { G.state = 'end'; zoneStop(); unlockUI(); const pl = G.player; $('endT').textContent = win ? WIN_LINES[Math.floor(Math.random() * WIN_LINES.length)] : '对局结束'; $('endS').textContent = `第 ${win ? 1 : G.rank || '—'} 名`; $('endStats').innerHTML = matchStats(); $('end').classList.add('on'); if (win) SFX.bell(true); }
 function banner(t, s, cls) { const b = $('banner'); b.className = 'on ' + (cls ? 'b-' + cls : ''); $('bannerT').textContent = t; $('bannerS').textContent = s || ''; }
-function addFeed(by, e, wkey, head) { G.feed.push({ t: G.now, html: `<span class="${by && by.isPlayer ? 'blue' : 'red'}">${by && by !== e ? by.name : ''}</span> <i>${head ? '◎' : '✕'}</i> <span class="${e.isPlayer ? 'blue' : 'red'}">${e.name}</span>`, me: (by && by.isPlayer) || e.isPlayer }); if (G.feed.length > 6) G.feed.shift(); drawFeed(); }
+function addFeed(by, e, wkey, head) { G.feed.push({ t: G.now, html: `<span class="${by && by.isPlayer ? 'blue' : 'red'}">${by && by !== e ? by.name : ''}</span> ${typeof SKIN !== 'undefined' && SKIN.on && G.icons && wkey && G.icons[wkey] ? `<img class="fi" src="${G.icons[wkey]}">${head ? '<b class="hs">✦</b>' : ''}` : `<i>${head ? '◎' : '✕'}</i>`} <span class="${e.isPlayer ? 'blue' : 'red'}">${e.name}</span>`, me: (by && by.isPlayer) || e.isPlayer }); if (G.feed.length > 6) G.feed.shift(); drawFeed(); }
 function drawFeed() { $('feed').innerHTML = G.feed.map(f => `<div class="${f.me ? 'me' : ''}">${f.html}</div>`).join(''); }
 
 /* ---------------- HUD ---------------- */
