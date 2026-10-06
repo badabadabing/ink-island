@@ -2,7 +2,7 @@
 /* ============ INK ISLAND · skin: the harbour-afternoon colour skin (palette of concept 5, scene language of concept 7). Flat colour + three-step toon light, indigo shadows, faint lines ============ */
 const SKIN = { on: true, c: {
   sky: 0x9fd3ec, horizon: 0xdceff4, ink: 0x2e3a59, shadow: 0x3b4a72,
-  grass: 0x7cc47f, grass2: 0x62b56e, sand: 0xe2cf92, rock: 0xb7c2c9, shallow: 0x5fd2d0, deep: 0x1c6fb0, sea: 0x2a84c7, foam: 0xd8f4f8,
+  grass: 0x7cc47f, grass2: 0x62b56e, sand: 0xe2cf92, rock: 0xc4bba8, shallow: 0x5fd2d0, deep: 0x1c6fb0, sea: 0x2a84c7, foam: 0xd8f4f8,
   cream: 0xf6f1e4, wood: 0xc99a62, glass: 0x9fd8e8, grey: 0x8c9ba8,
   coral: 0xff5a4e, sun: 0xffd23f, indigo: 0x2e3a59, teal: 0x2fa6a0,
   walls: [0xf7f2e6, 0xfff8ec, 0xe8f1ec, 0xf4e6cf, 0xe9eef5], roofs: [0x2e3a59, 0xff5a4e, 0xffd23f, 0x2fa6a0, 0x3a5a8c, 0xd94c3d],
