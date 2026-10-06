@@ -15,7 +15,7 @@ if (typeof SKIN !== 'undefined' && SKIN.on) {
   for (const t of TOWNS) if (ISL_TOWNS[t.id]) [t.name, t.en] = ISL_TOWNS[t.id];
   if (typeof BR_NAMES !== 'undefined') BR_NAMES.splice(0, BR_NAMES.length, ...ISL_BOTS); if (typeof BOT_NAMES !== 'undefined') BOT_NAMES.splice(0, BOT_NAMES.length, ...ISL_BOTS.slice(0, BOT_NAMES.length));
   if (typeof WIN_LINES !== 'undefined') WIN_LINES.splice(0, WIN_LINES.length, ...ISL_WIN);
-  if (typeof WEATHER !== 'undefined') WEATHER.dusk.name = '晚霞';
+  if (typeof WEATHER !== 'undefined') { WEATHER.dusk.name = '晚霞'; WEATHER.fog.name = '海雾'; WEATHER.fog.tint = 'rgba(214,236,244,.2)'; WEATHER.dusk.tint = 'rgba(255,176,32,.1)'; }
 }
 if (typeof SKIN !== 'undefined' && SKIN.on) { const tips = ['小贴士：铁锅盔比斗笠扛揍，但斗笠更好看。', '渔民之间流传：鞭炮机枪一开，全村都知道你在哪。', '海带绷带虽然腥，止血是真的快。', '据说码头尽头那位渔夫，已经睡了三天。', '墨鱼烟：看不见你的人，也闻得到你。', '猫不会告诉别人你躲在哪，但会盯着你看。', '路边摊写着「自取 · 付鱼」，请诚实。'], ll = document.getElementById('lastLine'); let ti = Math.floor(Math.random() * tips.length); const show = () => { if (!ll || (typeof G !== 'undefined' && G.state !== 'menu')) return; if (ll.dataset.brain) return; ll.style.opacity = 0; setTimeout(() => { ll.textContent = tips[ti++ % tips.length]; ll.style.opacity = 1; }, 400); }; setTimeout(() => { if (ll && !ll.textContent) show(); }, 600); setInterval(() => { if (ll && (!ll.textContent || ll.dataset.tip)) { ll.dataset.tip = 1; show(); } }, 6000); }
 if (typeof SKIN !== 'undefined' && SKIN.on) { const q = s => document.querySelector(s); const tag = q('#menu .tag'); if (tag) tag.textContent = '640 m 小渔岛 · 九处据点 · 你对 23 个会记仇的渔民'; const sub = q('#menu .sub'); if (sub) sub.textContent = '咸鱼岛'; const st = q('#start'); if (st) st.textContent = '出海 · 开始一局'; }
