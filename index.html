@@ -250,6 +250,10 @@ body.skin #end .panel{background:var(--paper)}
 body.skin .vitals div{border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff1d6;height:16px}
 body.skin #pickup img.pi{width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;border-radius:6px;background:#fff1d6}
 body.skin #feed img.fi{height:20px;width:auto;max-width:54px;vertical-align:middle;margin:0 4px;filter:drop-shadow(0 1px 0 rgba(46,58,89,.4))} body.skin #feed b.hs{color:var(--red);margin-right:4px}
+body.skin #start.cta::after{content:"";display:inline-block;width:26px;height:14px;margin-left:12px;vertical-align:middle;background:radial-gradient(circle at 30% 50%,#1a1a22 0 2px,transparent 2.5px),radial-gradient(ellipse at 40% 50%,#ffd23f 0 60%,transparent 62%);clip-path:polygon(0 50%,20% 10%,70% 10%,80% 35%,100% 0,100% 100%,80% 65%,70% 90%,20% 90%);transform-origin:70% 50%}
+body.skin #start.cta:hover::after{animation:fishwag .35s ease-in-out infinite alternate}
+@keyframes fishwag{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+body.skin .lastLine{font-weight:700;color:var(--teal);min-height:1.4em;transition:opacity .4s}
 body.skin #loading{background:#9fd3ec;color:var(--ink);font-weight:900}
 </style>
 </head>
