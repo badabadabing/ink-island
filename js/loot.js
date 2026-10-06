@@ -59,7 +59,7 @@ function invGive(e, k) { const w = WEAPONS[k]; e.inv[w.slot] = k; e.ammo[k] = { 
 /* take an item; returns a message, or false when it does not fit */
 function invTake(e, it) {
   const d = ITEMS[it.k], isPl = e.isPlayer, give = (k, q) => { if (isPl) banner('', '', ''); };
-  if (d.kind === 'gun') { const slot = WEAPONS[it.k].slot, had = e.inv[slot]; if (had === it.k) return false; if (had) lootDrop(e, had, it.x, it.z, it.y); invGive(e, it.k); if (isPl) { lootHide(it); switchTo(it.k); invCheck(e, 'take'); return `拾取 ${d.name}`; } else setEntWeapon(e, it.k); lootHide(it); invCheck(e, 'take'); return d.name; }
+  if (d.kind === 'gun') { const slot = WEAPONS[it.k].slot, had = e.inv[slot]; if (had === it.k) return false; if (had) { lootDrop(e, had, it.x, it.z, it.y); delete e.ammo[had]; } invGive(e, it.k); if (isPl) { lootHide(it); switchTo(it.k); invCheck(e, 'take'); return `拾取 ${d.name}`; } else setEntWeapon(e, it.k); lootHide(it); invCheck(e, 'take'); return d.name; }
   if (d.kind === 'ammo') { if (invLoad(e) + it.qty / 30 > BAG_CAP(e.bagLv) + .01) return false; e.pool[d.t] = (e.pool[d.t] || 0) + it.qty; lootHide(it); return `${d.name} ×${it.qty}`; }
   if (d.kind === 'med') { if (invLoad(e) + d.w > BAG_CAP(e.bagLv) + .01) return false; e.meds[it.k]++; lootHide(it); return d.name; }
   if (d.kind === 'vest') { if (e.vestLv >= d.lv && e.armor > d.ap * .5) return false; if (e.vestLv) lootDrop(e, 'vest' + e.vestLv, it.x, it.z, it.y); e.vestLv = d.lv; e.armor = d.ap; lootHide(it); return d.name; }
