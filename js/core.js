@@ -14,35 +14,39 @@ const angDiff = (a, b) => { let d = (a - b) % 6.283185; if (d > Math.PI) d -= 6.
 function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
 /* ---------------- materials ---------------- */
-const LINE_MATS = [];
+const LINE_MATS = [], FILL_MATS = [];
 function lineMat(o = {}) {
   const m = new LineMaterial({ color: o.color ?? INK, linewidth: o.width ?? 1.5, worldUnits: false });
   m.fog = o.fog !== false;
   if (o.depthTest === false) m.depthTest = false;
   if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; }
   m.resolution.set(innerWidth, innerHeight);
-  LINE_MATS.push(m);
+  LINE_MATS.push(m); if (typeof SKIN !== 'undefined' && SKIN.on && !o.keep) { m.color.set(SKIN.c.ink); m.transparent = true; m.opacity = Math.min(o.opacity ?? 1, .2); m.linewidth *= .6; }
   return m;
 }
 const FOG_D = 0.0105;
 function fillMat(o = {}) {
+  if (typeof SKIN !== 'undefined' && SKIN.on && SKIN.lit) { const lm = skinMat(o); FILL_MATS.push(lm); return lm; }
   const obj = !!o.objSpace;
-  return new THREE.ShaderMaterial({
+  const m = new THREE.ShaderMaterial({
     uniforms: {
       uPaper: { value: new THREE.Color(PAPER) }, uInk: { value: new THREE.Color(INK) },
-      uFreq: { value: o.freq ?? 4.0 }, uHatch: { value: o.hatch ?? 0.5 }, uHw: { value: o.hw ?? 0.1 }, uFog: { value: o.fog ?? FOG_D }, uFlash: { value: 0 }, uFlashC: { value: new THREE.Color(RED) }
+      uFreq: { value: o.freq ?? 4.0 }, uHatch: { value: o.hatch ?? 0.5 }, uHw: { value: o.hw ?? 0.1 }, uFog: { value: o.fog ?? FOG_D }, uFlash: { value: 0 }, uFlashC: { value: new THREE.Color(RED) },
+      uSkin: { value: 0 }, uShadow: { value: new THREE.Color(0x3b4a72) }, uSun: { value: SUN.clone().negate() }
     },
     vertexShader: `
       attribute float tone; attribute vec3 tint;
-      varying float vTone; varying vec3 vTint; varying vec3 vP; varying float vDist;
-      void main(){ vTone=tone; vTint=tint; vec4 wp=modelMatrix*vec4(position,1.0);
+      varying float vTone; varying vec3 vTint; varying vec3 vP; varying float vDist; varying vec3 vN;
+      void main(){ vTone=tone; vTint=tint; vec4 wp=modelMatrix*vec4(position,1.0); vN=normalize(mat3(modelMatrix)*normal);
         vP=${obj ? 'position' : 'wp.xyz'}; vec4 mv=viewMatrix*wp; vDist=-mv.z; gl_Position=projectionMatrix*mv; }`,
     fragmentShader: `
-      uniform vec3 uPaper,uInk,uFlashC; uniform float uFreq,uFog,uFlash,uHatch,uHw;
-      varying float vTone; varying vec3 vTint; varying vec3 vP; varying float vDist;
+      uniform vec3 uPaper,uInk,uFlashC,uShadow,uSun; uniform float uFreq,uFog,uFlash,uHatch,uHw,uSkin;
+      varying float vTone; varying vec3 vTint; varying vec3 vP; varying float vDist; varying vec3 vN;
       float hl(float v,float hw){ float w=fwidth(v)*2.0; float d=abs(fract(v)-0.5)*2.0;
         float a=1.0-smoothstep(hw-w,hw+w,d); return mix(a,hw,clamp(w*3.2-0.15,0.0,1.0)); }
       void main(){ float a=0.0;
+        if(uSkin>0.5){ vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; float l=dot(n,uSun); float s=l>0.5?1.0:(l>-0.12?0.86:0.6); vec3 base=vTone>0.9?uInk:vTint*(vTone>0.6?0.8:(vTone>0.2?0.9:1.0))*(vTone<0.0?1.0+vTone*0.5:1.0); vec3 c=mix(base*(0.35+0.65*s),uShadow*(0.45+0.55*s),(1.0-s)*0.75); if(vTone>0.9) c=uInk*(0.75+0.25*s);
+          float f=1.0-exp(-vDist*vDist*uFog*uFog); c=mix(c,uPaper,clamp(f,0.0,1.0)); c=mix(c,uFlashC,uFlash); gl_FragColor=vec4(c,1.0); return; }
         if(vTone>0.9) a=1.0;
         else if(vTone>0.15){ a=hl(dot(vP,vec3(0.577))*uFreq,uHw);
           if(vTone>0.5) a=max(a,hl(dot(vP,vec3(0.62,-0.62,0.2))*uFreq,uHw)); a*=uHatch; }
@@ -52,13 +56,15 @@ function fillMat(o = {}) {
     side: THREE.DoubleSide, polygonOffset: true,
     polygonOffsetFactor: o.offset ?? 1, polygonOffsetUnits: o.offset ?? 1
   });
+  FILL_MATS.push(m); if (typeof SKIN !== 'undefined' && SKIN.on) { m.uniforms.uSkin.value = 1; m.uniforms.uPaper.value.set(SKIN.c.horizon); m.uniforms.uInk.value.set(SKIN.c.ink); m.uniforms.uShadow.value.set(SKIN.c.shadow); }
+  return m;
 }
 
 /* ---------------- Sketch builder: accumulates filled geometry + ink edges, bakes to 2 draw calls ---------------- */
 const _tintCache = {};
-const tintOf = hex => _tintCache[hex] || (_tintCache[hex] = new THREE.Color(hex));
+const tintOf = hex => { if (typeof SKIN !== 'undefined') hex = SKIN.remap(hex); return _tintCache[hex] || (_tintCache[hex] = new THREE.Color(hex)); };
 class Sk {
-  constructor(auto = 'sun') { this.P = []; this.T = []; this.C = []; this.L = []; this.auto = auto; }
+  constructor(auto = 'sun', base = PAPER) { this.P = []; this.T = []; this.C = []; this.L = []; this.N = []; this.auto = auto; this.base = base; }
   _tone(nx, ny, nz) {
     if (this.auto === 'none') return 0;
     if (ny < -0.5) return 0.33;
@@ -75,9 +81,9 @@ class Sk {
     if (M) g.applyMatrix4(M);
     if (o.fill !== false) {
       const ng = g.index ? g.toNonIndexed() : g, p = ng.attributes.position.array, n = ng.attributes.normal.array;
-      const c = tintOf(o.tint ?? PAPER), tone = o.tone ?? -1;
+      const c = tintOf(o.tint ?? this.base), tone = o.tone ?? -1;
       for (let i = 0; i < p.length; i += 3) {
-        this.P.push(p[i], p[i + 1], p[i + 2]);
+        this.P.push(p[i], p[i + 1], p[i + 2]); this.N.push(n[i], n[i + 1], n[i + 2]);
         this.T.push(tone < 0 ? this._tone(n[i], n[i + 1], n[i + 2]) : tone);
         this.C.push(c.r, c.g, c.b);
       }
@@ -121,8 +127,8 @@ class Sk {
     return this.line(a, M);
   }
   tri(a, b, c, tone = 0, tint = PAPER, M) {
-    const col = tintOf(tint), v = new V3();
-    for (const p of [a, b, c]) { v.set(p[0], p[1], p[2]); if (M) v.applyMatrix4(M); this.P.push(v.x, v.y, v.z); this.T.push(tone); this.C.push(col.r, col.g, col.b); }
+    const col = tintOf(tint), v = new V3(), A = new V3(a[0], a[1], a[2]), B = new V3(b[0], b[1], b[2]), Cc = new V3(c[0], c[1], c[2]); if (M) { A.applyMatrix4(M); B.applyMatrix4(M); Cc.applyMatrix4(M); } const nn = B.clone().sub(A).cross(Cc.clone().sub(A)); if (nn.lengthSq() < 1e-12) nn.set(0, 1, 0); nn.normalize();
+    for (const p of [a, b, c]) { v.set(p[0], p[1], p[2]); if (M) v.applyMatrix4(M); this.P.push(v.x, v.y, v.z); this.T.push(tone); this.C.push(col.r, col.g, col.b); this.N.push(nn.x, nn.y, nn.z); }
     return this;
   }
   quad(a, b, c, d, tone, tint, M) { this.tri(a, b, c, tone, tint, M); return this.tri(a, c, d, tone, tint, M); }
@@ -132,7 +138,7 @@ class Sk {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(this.P, 3));
       g.setAttribute('tone', new THREE.Float32BufferAttribute(this.T, 1));
-      g.setAttribute('tint', new THREE.Float32BufferAttribute(this.C, 3));
+      g.setAttribute('tint', new THREE.Float32BufferAttribute(this.C, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(this.N, 3));
       g.computeBoundingSphere();
       grp.add(grp.fill = new THREE.Mesh(g, fm));
     }
@@ -162,8 +168,8 @@ function textTex(text, o = {}) {
   const w = o.w || 512, h = o.h || 128, c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d');
   if (o.bg) { g.fillStyle = o.bg; g.fillRect(0, 0, w, h); }
-  if (o.border) { g.strokeStyle = o.color || '#16161c'; g.lineWidth = o.border; g.strokeRect(o.border, o.border, w - 2 * o.border, h - 2 * o.border); }
-  g.fillStyle = o.color || '#16161c'; g.font = o.font || `bold ${h * 0.62}px "Arial Black", Impact, sans-serif`;
+  if (o.border) { g.strokeStyle = o.color || UIC('#16161c'); g.lineWidth = o.border; g.strokeRect(o.border, o.border, w - 2 * o.border, h - 2 * o.border); }
+  g.fillStyle = o.color || UIC('#16161c'); g.font = o.font || `bold ${h * 0.62}px "Arial Black", Impact, sans-serif`;
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + h * 0.04);
   if (o.stencil) { g.globalCompositeOperation = 'destination-out'; for (let x = 0; x < w; x += o.stencil) g.fillRect(x, 0, 3, h); }
   const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t;

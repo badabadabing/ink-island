@@ -1,4 +1,4 @@
-# INK ISLAND 墨岛
+# 咸鱼岛 SALTY ISLE
 
 纸白墨线画风的浏览器单人大逃杀。从「墨线突击」派生：同一套排线着色器、纸模士兵、固定弹道枪械与合成音效，换成一座 480 m 的小岛、跳伞、搜刮、蓝圈和 23 个 Bot。
 
@@ -18,7 +18,7 @@ python3 -m http.server 8766
 
 ## 线上
 
-- 玩：https://ink-island.pages.dev
+- 玩：https://salty-isle.pages.dev
 - 仓库：https://github.com/badabadabing/ink-island
 - 发布：`tools/deploy.sh`
 

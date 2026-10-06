@@ -3,7 +3,7 @@
 const CRATES = { list: [], fm: null, lm: null };
 function crateSpawn(e) {
   if (!CRATES.fm) { CRATES.fm = fillMat({ objSpace: false, freq: 30, hatch: .7, hw: .12, fog: .003 }); CRATES.lm = lineMat({ width: 1.3 }); }
-  const x = e.pos.x, z = e.pos.z, y = MAP.floorAt(x, z), items = [];
+  const off = typeof SKIN !== 'undefined' && SKIN.on ? .9 : 0, fd = e.yaw || 0, x = e.pos.x - Math.sin(fd + Math.PI / 2) * off, z = e.pos.z - Math.cos(fd + Math.PI / 2) * off, y = MAP.floorAt(x, z), items = [];
   const put = (k, qty) => { const it = lootSpawn(k, x, y, z, qty); it.inCrate = true; items.push(it); };
   for (const s of [1, 2]) if (e.inv[s]) put(e.inv[s]); for (const t in e.pool) if (e.pool[t] >= 5) put('a' + t, e.pool[t]); for (const k in e.meds) for (let i = 0; i < e.meds[k]; i++) put(k);
   if (e.vestLv) put('vest' + e.vestLv); if (e.helmLv) put('helm' + e.helmLv); if (e.bagLv) put('bag' + e.bagLv); if (e.ghillie) put('ghillie'); if (e.scope) put(e.scope); for (const k in e.nades) for (let i = 0; i < e.nades[k]; i++) put(k); for (const k in e.att) if (e.att[k]) put(k === 'mag' ? 'xmag' : k);

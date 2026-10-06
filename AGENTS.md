@@ -1,4 +1,4 @@
-# AGENTS.md — 墨岛 INK ISLAND（墨线版大逃杀）
+# AGENTS.md — 咸鱼岛 SALTY ISLE（原「墨岛」，海岛渔村风大逃杀）
 
 > 本文件是 Agent 在本项目的行为契约。改动前先读。任务拆解与分阶段方案见 [PLAN.md](PLAN.md)。
 
@@ -11,9 +11,15 @@
 - 冒烟：`node tools/smoke.js`（无头快进一整局，输出 `SMOKE OK`）
 
 ## 结构
-- `js/core.js` 调色板 / 排线着色器 / Sk 草图器 / 合成音效 —— 来自墨线突击，尽量不改
+- `js/core.js` 调色板 / 排线着色器 / Sk 草图器 / 合成音效 —— 来自墨线突击；2026-10-06 起 Sk 记录法线，fillMat 多一套 toon 分支（uSkin）
+- `js/skin.js` 彩色换皮：调色板、PAPER→奶油等重映射、天空/雾/云/太阳、线条淡化；`SKIN.on=false` 回到纸白墨线
 - `js/weapons.js` 武器数值 / 枪模 / 第一人称枪模 VM —— 来自墨线突击
 - `js/actors.js` 士兵模型 / 命中盒 / Bot 感知与交战 —— 来自墨线突击，去掉墨核分支
+- `js/islander.js` 斗笠渔夫角色（换皮模式接管 buildSoldier，骨骼不变）+ 头盔 / 背心 / 背包三级外显 + 六套配色
+- `js/gunskin.js` 换皮：枪支底色 + 梗配件、四种新投掷物、载具涂装与装饰（包装 finishGun；`vehDecor` 在 vehicle bake 前调用）
+- `js/endgame.js` 残局：第 2 圈起圈外 Bot 进圈、≤4 人互相听到、≤3 敌人罗盘方位、存活数显示圈外人数
+- `js/fxskin.js` 换皮特效（灰尘 / 彩屑 / 爆团 / 淡紫墨鱼烟 / 白冲击环）并延迟挂接 lgTemplate 换皮模板
+- `js/names.js` 换皮名字（武器 / 物品 / 载具 / 据点 / Bot / 胜利语 / 菜单文案），最后加载
 - `js/fx.js` 墨点、粒子、曳光 —— 来自墨线突击
 - `js/island.js` 地形高度场（2 m）/ 海 / 等高线 / 植被 / 道路 / 碰撞 / 射线 / 导航（1 m 细格 + 6 m 粗格路由）
 - `js/towns.js` 建筑套件与六处据点；`spot()` 记录物资刷新点
@@ -32,6 +38,7 @@
 - `js/touch.js` 手机双拇指触控层（`?touch` 可在桌面强开）；`MAP.lod` 在 island.js，画质档位在 game.js `applyQuality`
 
 ## 硬规则
+- 画风（2026-10-06 起换皮）：`SKIN.on` 时为海岛彩色 + 真实光照阴影（调色板在 `js/skin.js`），人物与建筑不用线稿；`SKIN.on=false` 回到纸白墨线。
 - **补丁脚本的替换文本里一个 `//` 都不许出现**（已经第五次把同一行后面的代码吞掉：这次吞掉了 `floor({...})`，全岛二层楼登记消失）。注释一律用 `/* */` 或单独成行。
 - 画风：主体只用 PAPER/INK；颜色仅 RED（血）、AMBER（空投/标记）、BLUE（蓝圈/UI）、GLASS、WOOD。
 - 名称与文案全部原创，不引用其他游戏的地名、枪名、口号。
@@ -39,7 +46,7 @@
 - 代码保持高密度单行风格，小改动用精确字符串替换，不整文件重排。
 - 新 JS 文件加入 `index.html` 的 `files` 数组（按依赖顺序）。
 - 改完必须：node --check 全过 + 浏览器实际看一眼无报错；流程改动跑 `tools/smoke.js`。
-- 不 commit / 不部署，除非用户要求。用户要求发布时用 `tools/deploy.sh`（GitHub `badabadabing/ink-island` + Cloudflare Pages `ink-island`，https://ink-island.pages.dev）；斑码盒子暂不上（2026-10-06 用户指示）。
+- 不 commit / 不部署，除非用户要求。用户要求发布时用 `tools/deploy.sh`（GitHub `badabadabing/ink-island` + Cloudflare Pages `salty-isle`，https://salty-isle.pages.dev）；斑码盒子暂不上（2026-10-06 用户指示）。
 
 ## 从墨线突击带过来的规矩（2026-10-06，见 `~/Desktop/inkstrike/LESSONS-FOR-INK-ISLAND.md`）
 - 背包只有一个真相源：给枪/收枪只走 `invGive`/`invTake`/`invDrop`，禁止直接改 `inv`/`ammo`；`invCheck()` 在拾取/丢弃/每 2 s 校验不变量（槽里的枪必有弹药记录、无孤儿记录、手里的枪在包里），违反即修复并 `console.warn('[INV] …')`，smoke 把它当失败。
@@ -71,5 +78,12 @@
 - 2026-10-06 用脚本打多处补丁时每个锚点都要 assert 唯一；失败要让脚本整体不写回，不然半套补丁落盘很难查。
 - 2026-10-06 `house()` 里新增有条件的 `R()` 调用会让全岛后续随机序列移位（badSpots 7→11 只是因为换了种子序列）：改生成逻辑后 badSpots 变化先用探针列出每个坏点再决定修什么，不要调阈值。
 - 2026-10-06 探针/smoke 报 `scene`/`VM.root` undefined 不一定是 WebGL 坏了：先看 pageerror 列表，往往是世界生成里的 ReferenceError 让 boot 中断。
+- 2026-10-06 `setWeather` 曾按 mesh 遍历给共享材质反复乘雾系数（100 个区块共用一个材质 → uFog 爆到 1e8，黄昏/雾天整岛变白，纸白画风下没人发现）：改材质 uniform 必须按材质去重，fog0 存在 material.userData。
+- 2026-10-06 截图探针和 smoke 不要并行跑两个 headless Chromium：GPU 争用会让截图偶发整层变白，先怀疑并行再怀疑代码。
+- 2026-10-07 往 Sk 里直接 push 顶点（lgAppend、背包图标）必须同时 push 法线 N，否则打光材质下物品发白发糊。
+- 2026-10-07 换皮后的 Lambert 材质被其它代码 clone 时要带上 uniforms 代理（skinMat 自带 clone），否则打爆载具时整帧崩溃。
+- 2026-10-07 世界装饰（遮阳篷、花箱）用位置哈希 hash01 决定，不能调 R()：多一次 R() 会让全岛随机序列移位、物资点和可达性全变。
+- 2026-10-07 纸白风下「看不见」的几何在换皮后会暴露：楼层分隔带整盒覆盖楼板、墨线圈、`INK` 粒子与贴花——换皮时逐类排查颜色为 PAPER/INK 的遗留件。
+- 2026-10-07 在早加载文件里包装晚加载文件的函数（如 gunskin 包 lgTemplate）会在加载期报 not defined；包装放到晚加载文件里执行。
 - 2026-10-05 地上物品不要用贴图纸片：用户第一眼就说像 2D。所有可见物都要是 Sk 画的纸模。
 - 2026-10-05 从墨线突击继承：国外 CDN 不可靠，一切资源放 `vendor/`；屏幕投影标签先用 `matrixWorldInverse` 判前方；水平面排线掠射角有摩尔纹，`hl()` 用 fwidth 淡出；步态必须由真实位移驱动。

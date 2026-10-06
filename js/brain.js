@@ -13,7 +13,7 @@ function brainDerive() { const d = BRAIN.data, m = d.matches || 0, kd = d.kills 
 const brainTownName = id => { const t = TOWNS.find(t => t.id === id); return t ? t.name : '野外'; };
 function brainMenu() { const card = $('brainCard'), d = BRAIN.data; if (!card || !d) return; const h = (d.hist || []).filter(r => !r.quit), last = h[h.length - 1], wins = h.filter(r => r.win).length, kv = (k, v, tip) => `<div class="kv"${tip ? ` title="${tip}"` : ''}><b>${k}</b><span class="v">${v}</span></div>`;
   const ll = $('lastLine'); if (ll) ll.innerHTML = last ? `上局 <b>第 ${last.rank} 名</b> · 击杀 ${last.kills}${wins ? ` · 吃鸡 ×${wins}` : ''} · 共 ${h.length} 局` : '第一次？落地先找枪，白圈是下一圈，蓝圈外会掉血。';
-  if (!d.matches) { card.innerHTML = '<h4>对手档案</h4><div>还没人认识你：打完一局，Bot 就会记住你的落点、路线和打法，下一局针对你。</div>'; return; }
+  if (!d.matches) { card.innerHTML = '<h4>对手档案</h4><div>还没人认识你：打完一局，渔民们就会记住你的落点、路线和打法，下一局针对你。</div>'; return; }
   card.innerHTML = '<h4>对手档案</h4>' + kv('记忆', `${d.matches} 局`) + kv('锐度', `${Math.round(d.skill * 100)}%`, '对手按你的战绩变强：反应更快、散布更小、看得更远') + (d.favTown ? kv('常落', `${brainTownName(d.favTown)} · ${d.hunters} 名猎手会跟跳`) : '') + (d.sniper || d.camper ? kv('被看穿', [d.sniper && '爱远狙', d.camper && '爱蹲守'].filter(Boolean).join(' / ')) : '') + '<button id="brainReset">忘掉我</button>'; const b = $('brainReset'); if (b) b.onclick = () => { brainReset(); SFX.ui(); }; }
 /* the match in progress: shots and hits, landing town, where you were when each ring was announced, how still you stand, how far your kills were */
 function brainMatchStart() { BRAIN.cur = { shots: 0, hits: 0, land: null, ph: {}, still: 0, stillN: 0, kdist: 0, kdistN: 0, indoorK: 0, kills: 0 }; BRAIN.lastKills = 0; BRAIN.sampleT = 0; BRAIN.lastPos = null; BRAIN.ph = -1; }

@@ -4,7 +4,7 @@ const VEH = { list: [], src: {} };
 const VTYPES = { jeep: { name: '纸壳吉普', max: 17, rev: 6, acc: 7, brake: 12, turn: 1.9, hw: 1.3, len: 1.9, seat: [-.45, .66, -.15], water: false, hp: 100 }, boat: { name: '折纸小艇', max: 11, rev: 3, acc: 3.5, brake: 5, turn: 1.1, hw: 1.0, len: 2.4, seat: [0, .2, 1.7], water: true, hp: 80 },
   moto: { name: '纸折摩托', max: 24, rev: 4, acc: 9, brake: 14, turn: 2.4, hw: .55, len: 1.1, seat: [0, .62, .08], water: false, hp: 70, lean: true } };
 function vehModel(type) {
-  if (!VEH.src[type]) { const s = new Sk('sun');
+  if (!VEH.src[type]) { const s = new Sk('sun', typeof SKIN !== 'undefined' && SKIN.on ? SKIN.c[type] || PAPER : PAPER);
     if (type === 'jeep') { const R = .42, Y = R, W = 1.72;
       /* tub: a side profile extruded across the width — low hood, cowl step, flat bed; fender flares over the wheels; door outlines inked on the sides */
       s.prof([[1.95, .5], [1.95, .92], [1.15, .96], [.95, 1.08], [-.35, 1.08], [-.45, .98], [-1.95, .98], [-1.95, .5]], W, { tone: -1 }); s.line([-.86, 1.0, -1.9, .86, 1.0, -1.9, -.86, 1.05, -.95, .86, 1.05, -.95, 0, .96, -1.9, 0, 1.06, -.95]);
@@ -50,7 +50,8 @@ function vehModel(type) {
       /* outboard: cowl, clamp bracket on the transom, tiller, shaft, skeg and a three-blade prop, fuel can */
       inkBlock(s, .44, .5, .58, 0, 1.02, 2.72, { tone: .33, bevel: .25 }); s.line([-.22, 1.1, 2.5, .22, 1.1, 2.5, -.22, .95, 2.5, .22, .95, 2.5]); s.box(.3, .3, .1, 0, .7, 2.52, { tone: .66 }); s.cyl(.03, .03, .7, 5, -.3, .95, 2.4, { r: [0, .6, 0], ax: 'z', tone: 1, edges: false }); s.box(.05, .05, .14, -.6, .95, 2.08, { tone: 1 });
       s.cyl(.06, .06, 1.0, 6, 0, .3, 2.8, { tone: 1, edges: false }); s.box(.05, .3, .3, 0, -.25, 2.88, { tone: .66 }); for (let k = 0; k < 3; k++) s.box(.04, .3, .12, 0, -.12, 2.98, { r: [k * 2.094, 0, 0], tone: .33 }); s.box(.3, .26, .22, -.5, .71, 2.1, { tint: RED, tone: 0 }); s.line([-.5, .84, 2.1, -.5, .92, 2.1]); }
-    VEH.src[type] = s.bake(fillMat({ objSpace: true, freq: 26, fog: WORLD_FOG }), lineMat({ width: 1.3 })); }
+    if (typeof vehDecor === 'function') vehDecor(type, s); VEH.src[type] = s.bake(fillMat({ objSpace: true, freq: 26, fog: WORLD_FOG }), lineMat({ width: 1.3 })); }
+  /* skin: the hull colour per vehicle type is the builder's base tint */
   const g = new THREE.Group(), src = VEH.src[type]; if (src.fill) g.add(new THREE.Mesh(src.fill.geometry, src.fill.material)); if (src.ink) g.add(new LineSegments2(src.ink.geometry, src.ink.material)); return g;
 }
 function vehSpawn(type, x, z, yaw) { const t = VTYPES[type], g = vehModel(type); scene.add(g); const y = t.water ? MAP.sea : MAP.floorAt(x, z); const v = { type, t, g, pos: new V3(x, y, z), yaw, speed: 0, steer: 0, driver: null, hp: t.hp, hw: t.hw, hgt: 1.4, vel: new V3(), onGround: true, stepSmooth: 0, crouchAmt: 0, roll: 0, pitch: 0 }; g.position.copy(v.pos); g.rotation.y = yaw; VEH.list.push(v); return v; }

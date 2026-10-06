@@ -111,7 +111,7 @@ function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[
     if (key === 'awp') { for (const z of [.13, -.29]) { b.cyl(.028, .028, .008, 12, 0, .082, z, { ax: 'z', tone: .33 }); } inkBlock(b, .054, .15, .018, 0, -.036, .438, { tone: .66 }); b.cyl(.010, .010, .025, 8, .033, .048, .276, { ax: 'x', tone: 1 }); }
   }
   if (['ak', 'm4', 'viper'].includes(key)) { const x = key === 'ak' ? .0145 : .0135; for (const q of [-1, 1]) { const a = key === 'ak' ? [[.135, -.066], [.165, -.154], [.217, -.218]] : key === 'm4' ? [[.048, -.076], [.055, -.174]] : [[-.012, -.15], [-.021, -.224]]; for (let i = 0; i < 3; i++) p.mag.poly(a.map(([f, u]) => [q * x, u, -f - i * .011])); } }
-  if (w.optic) { const oy = .118, z = -.07; meta.opticY = oy; b.box(.055,.008,.055,0,oy-.025,z,{tone:.66}); for(const x of [-.026,.026]) b.box(.007,.047,.032,x,oy,z,{tone:.66}); b.box(.055,.007,.032,0,oy+.023,z,{tone:.66}); b.cyl(.008,.008,.014,8,.039,oy-.013,z,{ax:'x',tone:1}); }
+  if (w.optic) { const oy = .118, z = -.07; meta.opticY = oy; b.box(.055,.008,.055,0,oy-.025,z,{tone:.66}); for(const x of [-.026,.026]) b.box(typeof SKIN!=='undefined'&&SKIN.on?.0035:.007,.047,.032,x,oy,z,{tone:.66}); b.box(.055,.007,.032,0,oy+.023,z,{tone:.66}); b.cyl(.008,.008,.014,8,.039,oy-.013,z,{ax:'x',tone:1}); }
   return meta;
 }
 function viewSleeve(s, a, b, r1, r2, tone) { const A = new V3(...a), B = new V3(...b), d = B.clone().sub(A), q = new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), d.clone().normalize()), m = new THREE.Matrix4().compose(A.add(B).multiplyScalar(.5), q, new V3(1, 1, .86)); s.add(new THREE.CylinderGeometry(r2, r1, d.length(), 7, 1), m, { ...(tone === undefined ? {} : { tone }), ea: 35 }); }
@@ -129,14 +129,14 @@ function viewGlove(s, f, u, support, pistol) { const z = -f, side = support ? -1
 const _wgCache = {};
 function worldGun(key, fm, lm) {
   let c = _wgCache[key]; if (!c) { const s = new Sk('under'); const meta = finishGun(key, { body: s, mag: s, bolt: s }); c = _wgCache[key] = { src: s.bake(fm, lm), meta }; }
-  const g = new THREE.Group(); if (c.src.fill) g.add(new THREE.Mesh(c.src.fill.geometry, fm)); if (c.src.ink) g.add(new LineSegments2(c.src.ink.geometry, lm)); g.userData.meta = c.meta; return g;
+  const g = new THREE.Group(); if (c.src.fill) g.add(new THREE.Mesh(c.src.fill.geometry, fm)); if (c.src.ink && !(typeof SKIN !== 'undefined' && SKIN.on)) g.add(new LineSegments2(c.src.ink.geometry, lm)); g.userData.meta = c.meta; return g;
 }
 
 /* ---------------- first-person viewmodel ---------------- */
 const VM = { off: {},
   models: {}, cur: null, key: null, kick: 0, kickR: 0, boltT: 0, cyc: 1, swX: 0, swY: 0, drawT: 1, reloadT: -1, atk: 1, atkKind: 0, insp: 1, flashT: 0, dip: 0,
   init(aspect) {
-    this.scene = new THREE.Scene(); this.cam = new THREE.PerspectiveCamera(54, aspect, .01, 10);
+    this.scene = new THREE.Scene(); this.cam = new THREE.PerspectiveCamera(54, aspect, .01, 10); if (typeof skinLights === 'function' && SKIN.on && SKIN.lit) skinLights(this.scene);
     this.fm = fillMat({ objSpace: true, freq: 75, fog: 0, hatch: .8, hw: .13 }); this.lm = lineMat({ width: 1.7, fog: false });
     this.root = new THREE.Group(); this.scene.add(this.root);
     const sh = new THREE.Shape(); for (let i = 0; i < 14; i++) { const a = i / 14 * 6.2832, r = i % 2 ? .35 : 1; i ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
