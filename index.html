@@ -294,6 +294,7 @@ body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opac
 /* d20 real-device fixes (iPhone Safari): grid tracks may shrink below their content so the menu never overflows the panel edge */
 .cardRow{grid-template-columns:repeat(3,minmax(0,1fr))} .cardRow.two{grid-template-columns:repeat(2,minmax(0,1fr))} .cardRow button{min-width:0}
 @media (max-width:900px){#menu .panel.menuP{grid-template-columns:minmax(0,1fr)} #menu .panel.menuP>*{min-width:0}}
+@media (max-height:560px){.ov.on>.panel{max-height:calc(100dvh - 16px);overflow-y:auto} .ov.on{padding:8px} body.skin .ov .panel,body.skin #menu .panel.menuP{padding-top:42px !important} body.skin .ov h2,body.skin .invP h2{font-size:30px;margin-bottom:4px} #crate .btns{position:sticky;bottom:-18px;margin:8px -4px -18px !important;padding:10px 4px 14px;background:var(--paper);z-index:2} #crateT2{margin-bottom:6px}}
 body.touch #hud,body.touch #touch{top:env(safe-area-inset-top,0px);right:env(safe-area-inset-right,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px)}
 body.skin.touch #gear{top:122px;bottom:auto;align-items:flex-start} body.skin.touch #weaponState{bottom:auto;top:156px}
 @media (max-width:560px){body.skin .cardRow button small{white-space:normal;overflow:visible} body.skin .cardRow button b{font-size:19px}}
