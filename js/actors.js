@@ -68,7 +68,7 @@ function animSoldier(e, dt) {
   // Stance foot travels exactly 2A while the body covers 2A: cadence = speed * duty / 2A, so planted feet never skate. Runs get a flight phase (lower duty).
   const run = clamp((sp - 2.9) / 1.7, 0, 1), cr = 1 - c * .35, gw = clamp((sp - .12) / .55, 0, 1), A = clamp(.22 + sp * .03, .22, .37) * cr, duty = .62 - .3 * run, air = e.onGround === false;
   if (!air && sp > .05) m.gait = ((m.gait || 0) + sp * duty / (2 * A) * dt) % 1; const g = m.gait || 0;
-  const hip = Math.min(.9 - .405 * c, Math.sqrt(.6561 - (A * gw) ** 2) + .075) - gw * (.018 + .028 * run) * (.5 + .5 * Math.cos((g - .12 * run) * 4 * Math.PI)) - (air ? .06 : 0);
+  const hip = Math.min(.884 - .405 * c, Math.sqrt(.6561 - (A * gw) ** 2) + .075) - gw * (.018 + .028 * run) * (.5 + .5 * Math.cos((g - .12 * run) * 4 * Math.PI)) - (air ? .06 : 0);
   const dX = sp > 1e-3 ? lx / sp : 0, dZ = sp > 1e-3 ? lz / sp : -1;
   const step = (off, rest) => { const t = (g + off) % 1; let p, lift = 0, roll = 0;
     if (t < duty) { const u = t / duty; p = A * (1 - 2 * u); if (u > .72) roll = -(u - .72) / .28 * .42; }
@@ -78,7 +78,7 @@ function animSoldier(e, dt) {
     leg.position.y = hip; leg.scale.y = 1; leg.rotation.set(aim + bend, 0, side, 'ZXY'); leg.shin.rotation.x = -2 * bend; leg.foot.rotation.set(-aim + bend + roll, 0, -side, 'XZY'); };   // side swing outermost keeps full lateral reach
   pose(m.legL, step(0, -.09)); pose(m.legR, step(.5, .06));
   const fwd = sp > 1e-3 ? -lz / sp : 0, sw = Math.sin(g * 2 * Math.PI) * gw, lean = (.04 + .08 * run) * gw * fwd;
-  m.upper.position.y = hip; m.upper.rotation.set(e.pitch * .7 + (e.flinch || 0) * .3 - lean * 1.6, sw * .06 * (1 - c * .5), -sw * .04); m.head.rotation.set(e.pitch * .25 + lean * .8, -sw * .035, sw * .02);
+  m.upper.position.y = hip; m.upper.rotation.set(e.pitch * .7 + (e.flinch || 0) * .3 - lean * 1.6, sw * .1 * (1 - c * .5), -sw * .035 + (1 - gw) * Math.sin(((typeof G !== 'undefined' ? G.now : 0) + (m.phase || 0)) * .7) * .018); m.head.rotation.set(e.pitch * .25 + lean * .8, -sw * .035, sw * .02);
   // arms: a rifle keeps the hold pose; bare hands (or a knife) swing against the legs; under a canopy they reach for the risers
   // arms: a rifle keeps the hold pose; empty hands hang at the sides and swing against the legs; under a canopy they reach for the risers; a jab snaps the right arm forward
   const armed = e.weapon && WEAPONS[e.weapon] && !WEAPONS[e.weapon].melee, chute = e.air === 'chute', swingA = chute ? 0 : armed ? 0 : Math.sin(g * 2 * Math.PI) * gw * (.38 + .3 * run), base = chute ? -2.7 : armed ? 0 : (air ? -1.6 : -1.22), tgt = m.armR.rotation, tgl = m.armL.rotation;

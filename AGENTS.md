@@ -35,6 +35,7 @@
 - `js/doors.js` 自动门：towns.js 在换皮模式把门板登记进 `MAP.doors`（不再烘焙静态门板），三组 InstancedMesh（门板/门芯/把手），玩家或 Bot 2.3 m 内自动打开约 105°，离开后关上；纯视觉，门洞不挡路
 - `js/handy.js` 便利层：地面物品浮动名牌（类别色 + 名称 + 数量/耐久 + 对你是否有用，视线检测）、自动拾取明显有用的东西（玩家刚丢的不捡）、H 快速治疗、设置里「自动拾取」开关
 - `js/endcard.js` 结算/阵亡卡：名次奖章、六格数据、本局称号、渔获记录、身上装备；× 或 Esc 收起成角落小条；包装 hurt/healStart 统计伤害、爆头、吃药
+- `js/pose.js` 手臂 IK（换皮模式）：手臂是上臂 + 前臂两段、静止下垂，`islArmIK` 两骨解算；包装 animSoldier（最后一个包装）与 ridePose，按状态给手目标——枪握把/护木（读枪的 meta.grip/lh）、刀低持、空手摆臂、冲刺低姿持枪、换弹托弹匣、手枪双持、方向盘/车把/梯子扶手/伞绳；结算动作在这里重写
 - `js/brain.js` Bot 跨局记忆（localStorage `inkisland_brain`）：包装 playerFire/hurt/botPlanDrop/startMatch/endMatch/updateHUD，最后加载
 - `js/replay.js` 死亡回放（环形缓冲 + 包装 frame/updateHUD/startMatch）与远处枪声闷响（包装 SFX.shot）
 - `js/finale.js` 结算动作与战绩走势图（最后加载，包装 endMatch/updateCamera/startMatch）
@@ -62,6 +63,8 @@
 - 暂不做：`sim.step(state, inputs)` 纯函数化（无联机计划时成本过高）、平台能力层（无小程序发布计划）。有计划时先做这两条再加功能。
 
 ## 沉淀的教训
+- 2026-10-07 手臂改成两段 IK 后，别的文件直接写 `armR.rotation` 的姿势（载具、梯子、结算、坐着的钓鱼人）都会被 pose.js 覆盖或含义改变：新姿势一律写成「手的目标点 + 肘部朝向」交给 `islArmIK`/`poseArm`，不要再写肩关节欧拉角。
+- 2026-10-07 截图探针里玩家死了会走死亡镜头、改写 camera；探针要么让玩家活着藏起来，要么在同一次 evaluate 里 render 后立刻 `toDataURL` 取图。
 - 2026-10-07 对局进行中的状态是 `G.state === 'live'`（不是 'play'）：handy.js 第一版写成 'play'，自动拾取和快速治疗全部静默失效，探针才查出来。
 - 2026-10-07 中文字体只用 `vendor/fonts` 里的子集（霞鹜文楷粗 + 马善政，OFL）：新增中文文案后跑 `python3 tools/subset-fonts.py` 重新子集化，否则新字回落到系统字体。描边/阴影一律用 em 单位，小按钮上 px 描边会把毛笔字糊掉。
 - 2026-10-07 物品「值不值得捡」只有一个判断 `lootUse(e, it)`（loot.js），必须和 invTake 的拒绝条件一一对应；护甲耐久跟着地上的背心走（`it.dur`），换甲只比耐久。
