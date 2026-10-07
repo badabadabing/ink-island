@@ -46,7 +46,7 @@ function landEntity(e, y) { e.air = null; if (!e.isPlayer) botLanded(e); e.pos.y
 const groundBelow = e => { const near = MAP.near(e.pos.x, e.pos.z); let y = Math.max(MAP.terrainY(e.pos.x, e.pos.z), MAP.sea + SWIM_Y); for (const s of near) if (e.pos.x + e.hw > s.x1 && e.pos.x - e.hw < s.x2 && e.pos.z + e.hw > s.z1 && e.pos.z - e.hw < s.z2 && s.y2 <= e.pos.y + .3 && s.y2 > y) y = s.y2; return y; };
 /* wx/wz: wished horizontal direction (unit or zero); dive: 0..1 */
 function airUpdate(e, dt, wx, wz, dive, wantChute) {
-  if (e.air === 'plane') { e.pos.copy(PLANE.pos); return; }
+  if (e.air === 'plane') { if (!e.deck) e.pos.copy(PLANE.pos); return; }
   const v = e.vel, chute = e.air === 'chute', tv = chute ? AIR.chuteV : lerp(AIR.fallV, AIR.diveV, dive), g = chute ? 14 : 20;
   v.y = damp(v.y, -tv, chute ? 3.5 : 1.4, dt); const gl = chute ? AIR.chuteGlide : AIR.glide * (1 - dive * .5); v.x = damp(v.x, wx * gl, chute ? 2.2 : 3, dt); v.z = damp(v.z, wz * gl, chute ? 2.2 : 3, dt);
   e.pos.x = clamp(e.pos.x + v.x * dt, MAP.bounds.x1, MAP.bounds.x2); e.pos.z = clamp(e.pos.z + v.z * dt, MAP.bounds.z1, MAP.bounds.z2); e.pos.y += v.y * dt;

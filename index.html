@@ -385,7 +385,7 @@ import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
-const files = ['core', 'skin', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'gunskin', 'lootgeo', 'actors', 'islander', 'fx', 'br', 'game', 'combat', 'vehicle', 'ladder', 'doors', 'crate', 'touch', 'replay', 'brain', 'endgame', 'fxskin', 'finale', 'pose', 'names', 'handy', 'endcard'];
+const files = ['core', 'skin', 'compat', 'loot', 'zone', 'island', 'towns', 'weapons', 'guns2', 'gunskin', 'lootgeo', 'actors', 'islander', 'fx', 'br', 'game', 'combat', 'vehicle', 'ladder', 'doors', 'balloon', 'crate', 'touch', 'replay', 'brain', 'endgame', 'fxskin', 'finale', 'pose', 'names', 'handy', 'endcard'];
 for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>

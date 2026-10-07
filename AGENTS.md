@@ -36,6 +36,7 @@
 - `js/handy.js` 便利层：地面物品浮动名牌（类别色 + 名称 + 数量/耐久 + 对你是否有用，视线检测）、自动拾取明显有用的东西（玩家刚丢的不捡）、H 快速治疗、设置里「自动拾取」开关
 - `js/endcard.js` 结算/阵亡卡：名次奖章、六格数据、本局称号、渔获记录、身上装备；× 或 Esc 收起成角落小条；包装 hurt/healStart 统计伤害、爆头、吃药
 - `js/pose.js` 手臂 IK（换皮模式）：手臂是上臂 + 前臂两段、静止下垂，`islArmIK` 两骨解算；包装 animSoldier（最后一个包装）与 ridePose，按状态给手目标——枪握把/护木（读枪的 meta.grip/lh）、刀低持、空手摆臂、冲刺低姿持枪、换弹托弹匣、手枪双持、方向盘/车把/梯子扶手/伞绳；结算动作在这里重写
+- `js/balloon.js` 换皮热气球：飞鱼气球模型（替换 planeModel）、可走动甲板（`deckPlayer`，玩家 pl.deck 本地坐标）、Bot 乘客站位（包装 planeUpdate）、从甲板位置跳伞（包装 jumpOut）
 - `js/brain.js` Bot 跨局记忆（localStorage `inkisland_brain`）：包装 playerFire/hurt/botPlanDrop/startMatch/endMatch/updateHUD，最后加载
 - `js/replay.js` 死亡回放（环形缓冲 + 包装 frame/updateHUD/startMatch）与远处枪声闷响（包装 SFX.shot）
 - `js/finale.js` 结算动作与战绩走势图（最后加载，包装 endMatch/updateCamera/startMatch）
