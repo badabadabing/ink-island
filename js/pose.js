@@ -16,7 +16,7 @@ function poseGunPt(m, fw, up) { const g = m.gun, c = g.children[0]; g.updateMatr
 function poseHand(m, side) { const arm = side > 0 ? m.armR : m.armL; arm.updateMatrix(); arm.elbow.updateMatrix(); return new THREE.Vector3(0, -POSE.B, 0).applyMatrix4(arm.elbow.matrix).applyMatrix4(arm.matrix); }
 function poseDamp(o, k, v, r, dt) { o[k] += (v - o[k]) * (1 - Math.exp(-r * dt)); }
 (() => { if (typeof SKIN === 'undefined' || !SKIN.on) return; const _anim = animSoldier;
-  animSoldier = function (e, dt) { _anim(e, dt); const m = e.model; if (!m || !m.armR || !m.armR.elbow) return; const t = (typeof G !== 'undefined' ? G.now : 0) + (m.phase || 0), R = m.armR.position, L = m.armL.position, w = WEAPONS[e.weapon] || {}, g = m.gun, meta = g.children[0] && g.children[0].userData.meta || {};
+  animSoldier = function (e, dt) { _anim(e, dt); const m = e.model; if (!m || !m.armR || !m.armR.elbow) return; if (m.ghillie && m.gear) { m.gear.hat.visible = false; m.gear.hatBack.visible = false; m.gear.helm.forEach(o => o.visible = false); } const t = (typeof G !== 'undefined' ? G.now : 0) + (m.phase || 0), R = m.armR.position, L = m.armL.position, w = WEAPONS[e.weapon] || {}, g = m.gun, meta = g.children[0] && g.children[0].userData.meta || {};
     const sp = Math.hypot(m.vx || 0, m.vz || 0), gw = Math.min(1, Math.max(0, (sp - .12) / .55)), run = Math.min(1, Math.max(0, (sp - 2.9) / 1.7)), ph = (m.gait || 0) * 6.2832, sw = Math.sin(ph) * gw;
     /* dead: arms go limp where they are */
     if (!e.alive) { poseArm(m, 1, R.x + .05, R.y - .5, R.z + .12, 0, -.2, 1, dt, 4); poseArm(m, -1, L.x - .05, L.y - .5, L.z + .1, 0, -.2, 1, dt, 4); return; }
@@ -65,3 +65,13 @@ function poseVeh(e, v, dt) { const m = e.model; if (!m || !m.armR || !m.armR.elb
     wrap('kneel', (m, t) => { const meta = m.gun.children[0] && m.gun.children[0].userData.meta; if (!meta || !meta.grip || !meta.lh) { A(m, 1, .2, .02, -.32, .8, -.4, .3); A(m, -1, -.22, .05, -.3, -.8, -.4, .3); return; } m.gun.position.set(.13, .42, -.3); m.gun.rotation.set(-.4, .3, 0); const gr = poseGunPt(m, meta.grip[0], meta.grip[1]); A(m, 1, gr.x, gr.y, gr.z, .9, -.6, .5); const h = poseGunPt(m, meta.lh[0], meta.lh[1] - .015); A(m, -1, h.x, h.y, h.z, -.7, -1, .1); });
   }
 })();
+/* prone (d26): body flat on the ground and tilted to the slope, chest propped on the elbows, gun held level along the view, frog-kick crawl driven by real movement */
+function poseProne(e, dt, kk) { const m = e.model, fx = -Math.sin(e.yaw), fz = -Math.cos(e.yaw), gy = (x, z) => { const f = MAP.floorAt(x, z); return Math.abs(f - e.pos.y) < 1.1 ? f : e.pos.y; };
+  const hH = gy(e.pos.x + fx * 1.5, e.pos.z + fz * 1.5), slope = Math.max(-.45, Math.min(.45, Math.atan2(hH - e.pos.y, 1.5))); m.pSlope = m.pSlope === undefined ? slope : m.pSlope + (slope - m.pSlope) * Math.min(1, dt * 8);
+  const rx = (-1.52 + m.pSlope) * kk; m.root.rotation.set(rx, e.yaw, 0, 'YXZ'); m.root.position.set(e.pos.x, e.pos.y + .13 * kk, e.pos.z);
+  const sp = Math.hypot(e.vel ? e.vel.x : 0, e.vel ? e.vel.z : 0); m.crawl = (m.crawl || 0) + Math.min(sp, 2) * dt * 4.2; const c = Math.sin(m.crawl), mov = Math.min(1, sp / .6);
+  m.upper.position.y = .9; const uRx = .55 * kk; m.upper.rotation.set(uRx, c * .07 * mov, c * .05 * mov); m.head.rotation.set(.62 * kk + (e.pitch || 0) * .25, 0, 0);
+  for (const [L, s, ph] of [[m.legL, -1, 0], [m.legR, 1, Math.PI]]) { const k = Math.max(0, Math.sin(m.crawl + ph)) * mov; L.position.y = .9; L.scale.y = 1; L.rotation.set(-.05 * kk, 0, s * (.12 + k * .35) * kk, 'ZXY'); L.shin.rotation.x = -(.15 + k * .9) * kk; L.foot.rotation.set(1.1 * kk, 0, 0, 'XZY'); }
+  const g = m.gun, meta = g.children[0] && g.children[0].userData.meta || {}, w = WEAPONS[e.weapon] || {}, gun = !!(meta.grip && !w.melee && !w.nade && g.visible !== false);
+  if (gun) { const tot = rx + uRx; g.position.set(.1, .5, -.32); g.rotation.set((e.pitch || 0) - tot, 0, 0); const gr = poseGunPt(m, meta.grip[0], meta.grip[1]); islArmIK(m.armR, gr.x, gr.y, gr.z, .6, -.2, .8); if (meta.pistol) { const h = poseGunPt(m, meta.grip[0] + .01, meta.grip[1] - .005); islArmIK(m.armL, h.x - .03, h.y - .03, h.z + .01, -.6, -.2, .8); } else { const lh = meta.lh || [.3, -.035], h = poseGunPt(m, lh[0], lh[1] - .015); islArmIK(m.armL, h.x, h.y, h.z, -.6, -.2, .8); } }
+  else { for (const [s, ph] of [[1, 0], [-1, Math.PI]]) { const k = Math.sin(m.crawl + ph) * mov, S = s > 0 ? m.armR.position : m.armL.position; islArmIK(s > 0 ? m.armR : m.armL, S.x + s * .05, S.y + .12 + k * .12, S.z - .42, s * .7, -.2, .6); } } }

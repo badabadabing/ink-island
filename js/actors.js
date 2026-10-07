@@ -157,7 +157,7 @@ function botThink(b, now) {
   if (now < (b.blindT || 0)) { b.target = null; b.targetVis = false; return; }
   let best = null, bs = 1e9; const D = DIFFS[G.diff];
   const grace = now < (b.landT || -99) + 22 && b.hp > 80;   // just landed: busy looting, only answers point-blank threats
-  for (const e of G.ents) { if (!e.alive || e.team === b.team || now < (e.spawnProtectedUntil || 0)) continue; const dx = e.pos.x - b.pos.x, dz = e.pos.z - b.pos.z, d = Math.hypot(dx, dz); if (grace && d > 6) continue; if (d > D.see * (WEAPONS[b.weapon].scope ? 1.5 : 1) * (G.seeMul || 1) * (G.brainMul ? G.brainMul.see : 1) * (e.ghillie ? (e.crouchAmt > 1.1 ? .3 : .6) : 1)) continue; if (WEAPONS[b.weapon].melee && (d > 2.4 || now - (b.hurtT || -99) > 5)) continue;   // a blade only answers someone who already cut you
+  for (const e of G.ents) { if (!e.alive || e.team === b.team || now < (e.spawnProtectedUntil || 0)) continue; const dx = e.pos.x - b.pos.x, dz = e.pos.z - b.pos.z, d = Math.hypot(dx, dz); if (grace && d > 6) continue; if (d > D.see * (WEAPONS[b.weapon].scope ? 1.5 : 1) * (G.seeMul || 1) * (G.brainMul ? G.brainMul.see : 1) * (e.ghillie ? (e.crouchAmt > 1.1 ? (Math.hypot(e.vel.x, e.vel.z) < .3 ? .16 : .3) : e.crouchAmt > .5 ? .45 : .6) : 1)) continue; if (WEAPONS[b.weapon].melee && (d > 2.4 || now - (b.hurtT || -99) > 5)) continue;   // a blade only answers someone who already cut you
     const ang = Math.abs(angDiff(Math.atan2(-dx, -dz), b.yaw)); if (!(d < 3.5 || ang < 1.0 || (now < b.alertT && ang < 1.9))) continue;
     if (!botSee(b, e)) continue; { const was = e.spottedBy && e.spottedBy[b.team]; if (b.team === G.team && G.state === 'live' && (!was || now - was.t > 6)) RADIO.say('spot', b.name); } markSpotted(e, b.team, now); const s = d * (e === b.target ? .6 : 1); if (s < bs) { bs = s; best = e; } }
   if (best) { if (b.target !== best || !b.targetVis) { b.target = best; b.reactT = now + D.react * (G.brainMul ? G.brainMul.react : 1) * rand(.8, 1.3) * (WEAPONS[b.weapon].scope ? 1.3 : 1) + (Math.hypot(best.pos.x - b.pos.x, best.pos.z - b.pos.z) < 6 ? .18 : 0); b.aimErr = .075; b.aimHead = Math.random() < D.head; b.burstN = 0; }
@@ -184,7 +184,7 @@ function botUtilityPlan(b, now) { if (!b.nade || now < (b.nadeCd || 0) || now < 
   return { kind, x, z, yaw, pitch: solution.pitch, landing: solution.p, error: solution.error, intent: kind === 'smoke' ? '封线掩护' : kind === 'flash' ? '闪光准备' : '爆弹清理' }; }
 function groundMove(e, wx, wz, maxSp, dt, accel = 13, fric = 8.5) {
   const v = e.vel;
-  if (e.onGround) { const sp = Math.hypot(v.x, v.z); if (sp > .001) { const drop = Math.max(sp, 1.6) * fric * dt, k = Math.max(0, sp - drop) / sp; v.x *= k; v.z *= k; }
+  if (e.onGround) { const sp = Math.hypot(v.x, v.z); if (sp > .001) { const drop = Math.max(sp, maxSp > 0 ? Math.min(1.6, maxSp * .8) : 1.6) * fric * dt, k = Math.max(0, sp - drop) / sp; v.x *= k; v.z *= k; }
     const cur = v.x * wx + v.z * wz, add = maxSp - cur; if (add > 0) { const a = Math.min(accel * maxSp * dt, add); v.x += wx * a; v.z += wz * a; } }
   else { const ws = Math.min(maxSp, .8), cur = v.x * wx + v.z * wz, add = ws - cur; if (add > 0) { const a = Math.min(14 * maxSp * dt, add); v.x += wx * a; v.z += wz * a; } }
 }
