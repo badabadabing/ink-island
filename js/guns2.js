@@ -48,7 +48,7 @@ function firesUpdate(dt) { for (let i = FIRES.length - 1; i >= 0; i--) { const f
 const inFire = e => { for (const f of FIRES) if (Math.hypot(e.pos.x - f.x, e.pos.z - f.z) < f.r + 1.5 && Math.abs(e.pos.y - f.y) < 2.2) return f; return null; };
 
 /* ---------- the crossbow: one bolt, a slow arc, no bang — nobody hears it ---------- */
-WEAPONS.bow = { name: '墨矢 弩', en: 'INK BOLT', slot: 1, dmg: 105, arm: .95, rate: .9, auto: false, mag: 1, res: 20, reload: 3.4, spread: .0008, moveSp: .14, sprayInc: 0, up: .02, side: .005, vm: .1, speed: .9, draw: .8, reward: 300, price: 0, snd: 'bow', fall: 1, range: 120, silent: true, crank: true };
+WEAPONS.bow = { name: '墨矢 弩', en: 'INK BOLT', slot: 1, dmg: 92, arm: .84, rate: .9, auto: false, mag: 1, res: 20, reload: 3.4, spread: .0008, moveSp: .14, sprayInc: 0, up: .02, side: .005, vm: .1, speed: .9, draw: .8, reward: 300, price: 0, snd: 'bow', fall: 1, range: 120, silent: true, crank: true };
 WEAPONS.bow.pat = mkPat(.02, .005, 1, 1, 0); AMMO.bow = 'bolt';
 GUNS.bow = p => { const b = p.body;
   /* a wooden stock with a flat rail on top, the prod across the nose, the string drawn back to the latch, one bolt lying in the groove */

@@ -16,12 +16,12 @@ function stepBullet(b, dt) {
   const h = rayWorld(_bp0.x, _bp0.y, _bp0.z, dx, dy, dz, len), tx = b.first ? b.mx : _bp0.x, ty = b.first ? b.my : _bp0.y, tz = b.first ? b.mz : _bp0.z; b.first = false;
   if (best && (!h || best.t < h.t)) { const partMul = best.part === 'head' && w.headMult ? w.headMult : best.mul, dmg = w.dmg * partMul * b.mul * weaponFalloff(w, b.d); if (!b.noTracer || !sh.isPlayer) FX.tracer(tx, ty, tz, _bp0.x + dx * best.t, _bp0.y + dy * best.t, _bp0.z + dz * best.t);
     if (dmg > 0) hurt(be, dmg, sh, sh.weapon, best.part, { x: dx, y: dy, z: dz }, { x: _bp0.x + dx * best.t, y: _bp0.y + dy * best.t, z: _bp0.z + dz * best.t }); return false; }
+  if (typeof vehBulletHit === 'function' && vehBulletHit(b.p.x, b.p.y, b.p.z, w.dmg, _bp0.x, _bp0.y, _bp0.z, sh, h ? h.t / len : 1)) { if (!b.noTracer || !sh.isPlayer) FX.tracer(tx, ty, tz, b.p.x, b.p.y, b.p.z); return false; }
   if (h && h.s && h.s.glass) { breakGlass(h.s.win, sh); b.p.set(_bp0.x + dx * (h.t + .1), _bp0.y + dy * (h.t + .1), _bp0.z + dz * (h.t + .1)); if (!b.noTracer || !sh.isPlayer) FX.tracer(tx, ty, tz, b.p.x, b.p.y, b.p.z); return b.d < b.range; }
   if (h) { const ix = _bp0.x + dx * h.t, iy = _bp0.y + dy * h.t, iz = _bp0.z + dz * h.t, thin = h.s && (h.tx - h.t) < .5;
     FX.decal(ix, iy, iz, h.nx, h.ny, h.nz, rand(.13, .24) * (w.dmg > 50 ? 1.5 : 1), INK); FX.burst(ix, iy, iz, h.nx, h.ny, h.nz, 4, INK, 2.5, .018); if (sh.isPlayer || Math.random() < .4) SFX.impact({ x: ix, y: iy, z: iz }); if (!b.noTracer || !sh.isPlayer) FX.tracer(tx, ty, tz, ix, iy, iz);
     if (thin && w.penetration !== 0 && b.pen === 0) { b.pen = 1; b.mul = w.penetration === undefined ? .55 : w.penetration; const ex = _bp0.x + dx * (h.tx + .02), ey = _bp0.y + dy * (h.tx + .02), ez = _bp0.z + dz * (h.tx + .02); FX.decal(ex, ey, ez, -h.nx, -h.ny, -h.nz, .2, INK); b.p.set(ex, ey, ez); b.v.multiplyScalar(.8); return b.d < b.range; } return false; }
   if (!b.noTracer || !sh.isPlayer) FX.tracer(tx, ty, tz, b.p.x, b.p.y, b.p.z);
-  if (typeof vehBulletHit === 'function' && vehBulletHit(b.p.x, b.p.y, b.p.z, w.dmg)) return false;
   return b.d < b.range && b.p.y > MAP.sea - 30;
 }
 function updateBullets(dt) { for (let i = BULLETS.length - 1; i >= 0; i--) { const b = BULLETS[i], sub = Math.max(1, Math.ceil(b.v.length() * dt / 12)); let alive = true; for (let k = 0; k < sub && alive; k++) alive = stepBullet(b, dt / sub); if (!alive) BULLETS.splice(i, 1); } }

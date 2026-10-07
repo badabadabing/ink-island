@@ -170,6 +170,7 @@ function textTex(text, o = {}) {
   if (o.bg) { g.fillStyle = o.bg; g.fillRect(0, 0, w, h); }
   if (o.border) { g.strokeStyle = o.color || UIC('#16161c'); g.lineWidth = o.border; g.strokeRect(o.border, o.border, w - 2 * o.border, h - 2 * o.border); }
   g.fillStyle = o.color || UIC('#16161c'); g.font = o.font || `bold ${h * 0.62}px "Arial Black", Impact, sans-serif`;
+  const tw = g.measureText(text).width, mw = w - 2 * (o.border || 0) - w * .06; if (tw > mw) g.font = g.font.replace(/(\d+(?:\.\d+)?)px/, (m, p) => Math.max(12, Math.floor(p * mw / tw)) + 'px');
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + h * 0.04);
   if (o.stencil) { g.globalCompositeOperation = 'destination-out'; for (let x = 0; x < w; x += o.stencil) g.fillRect(x, 0, 3, h); }
   const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t;
@@ -261,6 +262,7 @@ const SFX = {
   tick(pos) { if (!this.ctx) return; const o = this.out(pos, .3); this.mech(2600, .3, o); },
   plant() { if (!this.ctx) return; const o = this.out(null, .5); this.tone(880, 880, .09, .6, o, 'square'); this.tone(880, 880, .09, .6, o, 'square', .14); this.tone(1320, 1320, .22, .6, o, 'square', .28); },
   beep(pos, fast) { if (!this.ctx) return; const o = this.out(pos, .55); this.tone(fast ? 2300 : 1900, fast ? 2300 : 1900, .07, .7, o, 'square'); },
+  zoneTick() { if (!this.ctx) return; const o = this.out(null, .45); this.noise(.16, 320, 110, .8, o); this.tone(72, 44, .2, .7, o, 'sine'); },
   hiss(pos) { if (!this.ctx) return; const o = this.out(pos, .7); this.noise(.12, 1500, 500, .9, o); this.noise(2.6, 5200, 1800, .45, o, 'bandpass', .6, .05); },
   bang(pos) { if (!this.ctx) return; const o = this.out(pos, 1.2, .6); this.noise(.04, 9000, 3000, 1.2, o, 'highpass', .7); this.noise(.22, 3000, 400, 1, o, 'bandpass', .6); this.tone(180, 50, .2, .9, o); },
   ring(dur) { if (!this.ctx) return; const o = this.out(null, .22); this.tone(3300, 3250, Math.max(.6, dur * 1.1), .8, o, 'sine'); this.tone(4700, 4650, Math.max(.4, dur * .8), .3, o, 'sine'); },

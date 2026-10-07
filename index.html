@@ -56,6 +56,7 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 #pickup div.near{box-shadow:3px 3px 0 rgba(22,22,28,.9);font-weight:700}
 #pickup b{background:var(--ink);color:var(--paper);padding:0 6px;margin-right:6px}
 #pickup small{opacity:.6;margin-left:6px}
+#pickup div.no{border-color:#ff5a4e}
 #prog{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);width:220px;display:none;text-align:center;font-size:12px;letter-spacing:2px}
 #prog .bar{margin-top:4px}
 #gear{position:absolute;right:18px;bottom:112px;display:flex;gap:6px;font-size:11px}
@@ -68,6 +69,7 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 #crate table{width:100%;border-collapse:collapse;font-size:13px}
 #crate td{padding:5px 8px;border-bottom:1px solid rgba(22,22,28,.2)} #crate td:last-child{text-align:right}
 #crate td button{padding:2px 10px;font-size:11px;letter-spacing:0}
+#crate em.tg{font-style:normal;font-size:11px;font-weight:900;margin-left:6px;padding:1px 6px;border-radius:999px;background:#ffe2cf;color:#b4501a} #crate em.tg.no{background:#d9d4c8;color:#6b6457}
 #inv{z-index:5}
 #pause{background:rgba(245,242,234,.35)}
 #pause .panel{min-width:0;width:min(380px,94vw);padding:18px 22px;text-align:left;box-shadow:4px 4px 0 rgba(22,22,28,.9)}
@@ -149,7 +151,7 @@ body.touch .desktopOnly{display:none}
 #joyBase{position:absolute;display:none;width:124px;height:124px;margin:-62px 0 0 -62px;border:2px solid var(--ink);border-radius:50%;background:rgba(245,242,234,.35);pointer-events:none}
 #joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:var(--ink);opacity:.8;transform:translate(-50%,-50%)}
 .tb{position:absolute;width:62px;height:62px;border:2px solid var(--ink);border-radius:50%;background:rgba(245,242,234,.82);color:var(--ink);font:12px "IBM Plex Mono","PingFang SC",monospace;letter-spacing:1px;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:3px 3px 0 rgba(22,22,28,.55);line-height:1.15}
-.tb.sq{border-radius:6px;width:54px;height:40px;font-size:11px}
+.tb.sq{border-radius:6px;width:54px;height:44px;font-size:11px}
 .tb.big{width:92px;height:92px;font-size:15px}
 .tb.dn{background:var(--ink);color:var(--paper);transform:scale(.94)}
 .tb.off{opacity:.3}
@@ -157,16 +159,19 @@ body.touch .desktopOnly{display:none}
 #tFire{right:120px;bottom:20px} #tFire2{left:46%;bottom:40px;width:70px;height:70px;font-size:13px} #tAim{right:150px;bottom:130px} #tJump{right:76px;bottom:120px} #tReload{right:224px;bottom:100px} #tUse{right:230px;bottom:20px;width:70px;height:70px}
 #tSwap{right:224px;bottom:176px} #tMode{right:150px;bottom:204px} #tNade{right:300px;bottom:170px;width:50px;height:50px;font-size:11px} #tThrow{right:310px;bottom:84px}
 #tSprint{left:290px;bottom:100px;width:52px;height:52px} #tCrouch{left:12px;bottom:100px;width:52px;height:52px} #tProne{left:12px;bottom:162px;width:52px;height:52px}
-#tMap{top:12px;right:16px} #tBag{top:12px;right:80px} #tPause{top:12px;right:144px} #tBand{top:62px;right:16px} #tPill{top:62px;right:80px}
+#tMap{top:12px;right:16px} #tBag{top:12px;right:80px} #tPause{top:12px;right:150px} #tBand{top:124px;right:16px} #tPill{top:124px;right:80px}
 #replayTag{position:fixed;left:50%;top:18px;transform:translateX(-50%);display:none;padding:6px 16px 8px;border:2px solid var(--ink);background:var(--paper);font-size:12px;letter-spacing:3px;z-index:5;cursor:pointer;text-align:center} #replayTag.on{display:block} #replayTag .bar{height:3px;background:rgba(22,22,28,.2);margin-top:6px} #replayTag .bar i{display:block;height:100%;background:var(--blue);width:0}
 #brainFoot{margin-top:10px;color:var(--blue)} #brainFoot button{margin-left:6px} .brainNote{margin-top:10px;font-size:11px;letter-spacing:1px;color:var(--blue)}
 body.touch #help,body.touch #captureMouse{display:none!important}
 body.touch #top div{min-width:84px;padding:3px 8px} body.touch #top b{font-size:18px}
-body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch #ammoBox{transform:scale(.8);transform-origin:right bottom}
+body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch #ammoBox{transform:scale(.72);transform-origin:right bottom;right:8px;bottom:8px;max-width:150px} body.touch #wen{display:none} body.touch #wname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} body.touch #slots{flex-wrap:wrap;row-gap:4px} body.touch #slots span{white-space:nowrap}
+body.touch #pickup{left:50%;top:auto;bottom:156px;transform:translateX(-50%);align-items:center;font-size:12px}
+body.touch #pickup b,body.touch .ltag kbd{display:none}
+body.touch #feed{top:176px}
 body.touch #gear{top:90px;bottom:auto;left:50%;right:auto;transform:translateX(-50%)}
 body.touch .ov .panel{padding:18px 20px;min-width:0;max-width:94vw;max-height:92vh;overflow:auto}
 body.touch #crate .panel{min-width:0;width:min(94vw,520px)}
-body.touch #pause .panel{margin:12vh 0 0 16px}
+body.touch #pause .panel{margin:0 auto;display:flex;flex-direction:column} body.touch #pause .btns{order:1;flex-direction:row;gap:8px;margin:4px 0 6px} body.touch #pause .btns button{flex:1 1 0;min-width:0;min-height:44px;padding:6px 8px;white-space:nowrap} body.touch.skin #pause .btns button.pri,body.touch #pause .btns button.pri{font-size:18px;letter-spacing:2px} body.touch #pause .note{order:2;margin:0 0 6px} body.touch #pause #pauseSet{order:3}
 body.touch #bigmap canvas{width:min(78vh,86vw)!important;height:min(78vh,86vw)!important}
 /* ===== skin: harbour-sticker UI (body.skin) — cream cards, thick indigo outlines, offset shadows, beach-umbrella awnings, coral / teal / sunflower accents ===== */
 body.skin{--paper:#fff8ec;--ink:#2e3a59;--red:#ff5a4e;--amber:#ffb020;--blue:#1c6fb0;--grey:#8c9ba8;--teal:#2fa6a0;--sun:#ffd23f;--mint:#dceff4;--leaf:#7cc47f;--r:14px;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;background:#9fd3ec}
@@ -209,6 +214,7 @@ body.skin #wname{font-weight:900;letter-spacing:2px;text-shadow:2px 2px 0 var(--
 body.skin #pickup div{border:3px solid var(--ink);border-radius:12px;background:var(--paper);box-shadow:0 3px 0 var(--ink);font-weight:800}
 body.skin #pickup div.near{background:#fff1d6}
 body.skin #pickup b{background:var(--red);color:#fff;border-radius:7px;padding:1px 7px;margin-right:6px}
+body.skin #pickup div.no{border-color:#ff5a4e;box-shadow:0 3px 0 #ff5a4e;background:#ffe3df}
 body.skin #feed div{border:2.5px solid var(--ink);border-radius:10px;background:rgba(255,248,236,.92);font-weight:700} body.skin #feed div.me{background:var(--sun)}
 body.skin #banner #bannerT{background:var(--sun);color:var(--ink);border:4px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 var(--ink);font-weight:900;letter-spacing:6px;padding:8px 26px}
 body.skin #banner.b-win #bannerT{background:var(--red);color:#fff}
