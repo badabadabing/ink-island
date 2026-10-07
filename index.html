@@ -295,6 +295,15 @@ body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opac
 body.skin #banner #bannerT{white-space:nowrap;max-width:62vw;overflow:hidden;text-overflow:ellipsis;font-size:clamp(18px,2.4vw,30px)}
 #help{max-width:min(560px,calc(100vw - 760px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis} @media (max-width:1100px){#help{display:none}}
 #end.on>.panel,#dead.on>.panel{max-height:calc(100dvh - 24px);overflow-y:auto} body.skin #endT,body.skin #deadT{word-break:keep-all;font-size:clamp(22px,2.6vw,30px)}
+/* d37 controls feel: HUD stays readable over the scope, side posts on the reticle, reload tint, calmer HUD while fighting */
+body.skin #fx{z-index:2} body.skin #scope{z-index:1} body.skin #hud{z-index:3}
+body.optic #mag,body.optic #res,body.optic #wname{color:#f5efe0;text-shadow:0 2px 0 #1e2a44,0 0 6px rgba(30,42,68,.8)} body.optic #mag{font-size:44px} body.optic #wen{opacity:0}
+body.reloading.skin #mag{color:#ffb020;animation:magPulse .18s ease-out}
+@keyframes magPulse{0%{transform:scale(1)}50%{transform:scale(.9)}100%{transform:scale(1)}}
+body.helpGone #help{opacity:0;transition:opacity .6s}
+body.skin #meds span.zero{display:none}
+body.fighting #meds{opacity:.4;transition:opacity .3s}
+body.skin #stamBox[hidden]{display:block !important;visibility:hidden}
 /* d36 scope picture in the sticker style: a navy body ring, a cream lens rim, faint sea-blue glass tint, a coral chevron reticle with a stadia line */
 body.skin #scope{background:radial-gradient(circle at center,rgba(159,216,232,.10) 0,rgba(159,216,232,.10) 35vh,#fff6e6 35.3vh,#fff6e6 36.6vh,#2e3a59 36.9vh)}
 body.skin #scope::before{width:2px;height:28vh;top:auto;bottom:13vh;transform:translateX(-50%);background:#2e3a59}

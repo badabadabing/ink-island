@@ -33,7 +33,7 @@ function poseDamp(o, k, v, r, dt) { o[k] += (v - o[k]) * (1 - Math.exp(-r * dt))
     if (e.air === 'chute') { poseArm(m, 1, .2, 1.02, .02, .8, 0, .3, dt); poseArm(m, -1, -.2, 1.02, .02, -.8, 0, .3, dt); return; }
     if (e.air === 'fall' || e.air === 'plane') { poseArm(m, 1, .62, .48, .05, 0, -1, .3, dt, 8); poseArm(m, -1, -.62, .48, .05, 0, -1, .3, dt, 8); return; }
     const airborne = e.onGround === false, reload = e.isPlayer ? (e.reloadEnd >= 0 && G.now < e.reloadEnd) : (e.reloadT > 0), gun = !!(e.weapon && WEAPONS[e.weapon] && !w.melee && !w.nade && meta.grip && g.visible !== false), sprint = run > .2 && !e.scoped && !(e.isPlayer && G.fire);
-    if (!m.gp) m.gp = { x: .13, y: .42, z: -.3, rx: 0, ry: 0, rz: 0 }; const gp = m.gp;
+    if (!m.gp) m.gp = { x: .13, y: .42, z: -.3, rx: 0, ry: 0, rz: 0 }; const gp = m.gp; { const cr = Math.min(1, e.crouchAmt || 0); if (cr > .05 && (e.crouchAmt || 0) < 1.2) m.upper.rotation.x += .42 * cr; }
     if (gun) { const pist = !!meta.pistol, low = sprint ? run : airborne ? .5 : 0; let tx = pist ? .03 : .13, ty = pist ? .42 : .42, tz = pist ? -.6 : -.3, rx = pist ? 0 : -.1, ry = 0, rz = 0;
       if (low) { tx = lerp(tx, .05, low); ty = lerp(ty, .33, low); tz = lerp(tz, -.2, low); rx = -.55 * low; ry = .55 * low; } if (reload) { const k = Math.sin(t * 9) * .5 + .5; rx = -.26; rz = .55; ty = .32; tz = -.26; tx = .08; ry = .1 * k; m.head.rotation.x += .26; }
       for (const [k, v] of [['x', tx], ['y', ty], ['z', tz], ['rx', rx], ['ry', ry], ['rz', rz]]) poseDamp(gp, k, v, 10, dt); g.position.set(gp.x, gp.y, gp.z + (e.recoilT || 0) * .04); g.rotation.set(gp.rx, gp.ry, gp.rz);

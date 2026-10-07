@@ -155,7 +155,7 @@ const VM = { off: {},
   },
   show(key) { if (this.cur) this.root.remove(this.cur.group); const sk = PROG.skin(key), id = key + sk + ':' + (G.set.actorStyle || 'scribe'); this.cur = this.models[id] || (this.models[id] = this.build(key, sk)); this.key = key; this.root.add(this.cur.group);
     this.cur.group.add(this.flash); const mz = this.cur.meta.muzzle; this.flash.position.set(0, mz[1], -mz[0] - .03); this.drawT = 0; this.reloadT = -1; this.atk = 1; this.insp = 1; this.cyc = 1; },
-  fire(w) { this.kick = Math.min(this.kick + w.vm, .22); this.kickR = Math.min(this.kickR + w.vm * 1.6, .4); this.boltT = 1; this.flashT = .05; this.flash.rotation.z = rand(6.28); this.flash.scale.setScalar(rand(.05, .085) * (w.snd === 'm4' ? .5 : 1)); if (w.bolt || w.pump) this.cyc = 0; this.insp = 1; },
+  fire(w) { this.kick = Math.min(this.kick + w.vm, .22); this.kickR = Math.min(this.kickR + w.vm * 1.6, .4); this.boltT = 1; this.flashT = .05; this.flash.rotation.z = rand(6.28); this.flash.scale.setScalar(rand(.05, .085) * (w.snd === 'm4' ? .5 : 1) * (typeof SKIN !== 'undefined' && SKIN.on ? .45 : 1)); if (w.bolt || w.pump) this.cyc = 0; this.insp = 1; },
   update(dt, pl, w, mdx, mdy) {
     const c = this.cur; if (!c) return; const meta = c.meta, P = c.parts, r = this.root;
     this.kick = damp(this.kick, 0, 13, dt); this.kickR = damp(this.kickR, 0, 11, dt); this.boltT = damp(this.boltT, 0, 28, dt); this.dip = damp(this.dip, 0, 9, dt);
