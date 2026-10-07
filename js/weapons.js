@@ -183,6 +183,6 @@ const VM = { off: {},
     if (this.atk < 1) { this.atk = Math.min(1, this.atk + dt / (this.atkKind ? .5 : .3)); const k = Math.sin(this.atk * Math.PI);
       if (meta.nade) { z -= k * .22; y += k * .1; rx -= k * .8; } else if (this.atkKind) { z -= k * .28; rx -= k * .3; ry -= k * .5; } else { x -= k * .2; ry += k * 1.0; rz += k * .6; z -= k * .08; } }
     if (this.insp < 1) { this.insp = Math.min(1, this.insp + dt / 2.6); const k = Math.sin(this.insp * Math.PI), q = Math.sin(this.insp * 6.2832); ry += k * .95; rz += q * .4; x -= k * .06; y += k * .025; rx += k * .15; }
-    this.ads = damp(this.ads || 0, pl.scoped && w.optic ? 1 : 0, 18, dt); const ad = this.ads; x *= 1 - ad; y = y * (1 - ad) + (-(meta.opticY || .118) - this.kick * .04) * ad; z = z * (1 - ad) - .44 * ad; rx *= 1 - ad * .9; ry *= 1 - ad; rz *= 1 - ad; r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0 && w.scope) && pl.alive;
+    this.ads = damp(this.ads || 0, pl.scoped && w.optic ? 1 : 0, 18, dt); const ad = this.ads, sk = typeof SKIN !== 'undefined' && SKIN.on; x = x * (1 - ad) + (sk ? .012 : 0) * ad; y = y * (1 - ad) + (-(meta.opticY || .118) - this.kick * .04 - (sk ? .03 : 0)) * ad; z = z * (1 - ad) - .44 * ad; rx *= 1 - ad * .9; ry *= 1 - ad; rz *= 1 - ad; r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0 && w.scope) && pl.alive;
   }
 };
