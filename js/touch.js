@@ -11,7 +11,7 @@ function initTouch() {
   const L = $('touch'), knob = $('joyKnob'), base = $('joyBase'), btnOf = el => el && el.closest ? el.closest('[data-b]') : null, held = TOUCH.held;
   const press = (b, down) => { const k = b.dataset.b, pl = G.player; if (b.classList.contains('off')) return; if (['fire', 'jump', 'use'].includes(k)) b.classList.toggle('dn', down || held(k)); else if (down && !['sprint', 'crouch', 'aim'].includes(k)) { b.classList.add('dn'); setTimeout(() => b.classList.remove('dn'), 140); }
     if (k === 'fire') { G.fire = down || held('fire'); if (down) G.fireEdge = true; }
-    else if (k === 'jump') { G.keys.Space = down || held('jump'); }
+    else if (k === 'jump') { if (down) G.keys.Space = true; else setTimeout(() => { if (!held('jump')) G.keys.Space = false; }, 120); }
     else if (k === 'use') { if (down) onKey('KeyF'); }
     else if (!down) return;
     else if (k === 'aim') { TOUCH.aim = !TOUCH.aim; G.alt = TOUCH.aim; if (TOUCH.aim) G.altEdge = true; b.classList.toggle('dn', TOUCH.aim); }
