@@ -288,7 +288,7 @@ function bindUI() {
 const CAM = { dist: 3.0, side: .78, up: .36 };
 /* d29 camera distance: close on stairs (stay inside the stairwell, never above the next floor), shorter under a roof so it stops hugging walls */
 /* the player's own body turns see-through when the camera is pulled in close (stairs, small rooms) */
-function camFadeSelf(pl, dt) { const fm = pl.model && pl.model.fm; if (!fm) return; const want = (CAM.cur || CAM.dist) < 1.7 && pl.ads < .5 ? .38 : 1; fm.opacity = damp(fm.opacity === undefined ? 1 : fm.opacity, want, 10, dt); const t = fm.opacity < .98; if (fm.transparent !== t) { fm.transparent = t; fm.needsUpdate = true; } fm.depthWrite = !t; }
+function camFadeSelf(pl, dt) { const m = pl.model, fm = m && m.fm; if (!fm || !fm.uniforms || !fm.uniforms.uFade) return; const close = (CAM.cur || CAM.dist) < 1.7 && pl.ads < .5, u = fm.uniforms.uFade; u.value = damp(u.value, close ? .4 : 1, 10, dt); if (u.value > .985) u.value = 1; if (m.gear && m.gear.hatBack) m.gear.hatBack.scale.setScalar(close ? .001 : .55); }
 function camIndoorDist(pl) { const p = pl.pos, near = MAP.near(p.x, p.z); let stair = false, roof = false; for (const q of near) { if (q.veg || q.glass) continue; if (q.stair && p.x > q.x1 - .7 && p.x < q.x2 + .7 && p.z > q.z1 - .7 && p.z < q.z2 + .7 && q.y2 > p.y - .3 && q.y1 < p.y + 1.2) stair = true; if (p.x > q.x1 && p.x < q.x2 && p.z > q.z1 && p.z < q.z2 && q.y1 > p.y + 1.6 && q.y1 < p.y + 4.5) roof = true; } return stair ? .85 : roof ? 2.2 : CAM.dist; }
 function updateCamera(dt) {
   const pl = G.player; let fov = G.set.fov; G.shake = damp(G.shake, 0, 9, dt); const motion = G.set.motion, sh = G.shake * .012 * motion;
