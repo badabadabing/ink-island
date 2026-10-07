@@ -37,12 +37,12 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(LXGWWenKai-Bold-sub.woff2) format('woff2');
+  src: url(LXGWWenKai-Bold-sub.woff2?v=d39) format('woff2');
 }
 @font-face {
   font-family: 'Ma Shan Zheng';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(MaShanZheng-sub.woff2) format('woff2');
+  src: url(MaShanZheng-sub.woff2?v=d39) format('woff2');
 }

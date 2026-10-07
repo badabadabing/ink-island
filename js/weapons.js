@@ -5,7 +5,7 @@ const WEAPONS = {
   p9:     { name: 'P9 速写', en: 'P9 SKETCH', slot: 2, dmg: 30, arm: .52, rate: .14, auto: false, mag: 12, res: 48, reload: 1.9, spread: .0035, moveSp: .022, sprayInc: .004, up: .016, side: .004, vm: .05, speed: .98, draw: .4, reward: 300, price: 200, snd: 'pistol', fall: .82 },
   deagle: { name: '重墨 .50', en: 'HEAVY INK .50', slot: 2, dmg: 58, arm: .93, rate: .27, auto: false, mag: 7, res: 35, reload: 2.1, spread: .0025, moveSp: .04, sprayInc: .03, up: .05, side: .012, vm: .11, speed: .95, draw: .5, reward: 300, price: 700, snd: 'deagle', fall: .85 },
   viper:  { name: '飞白 冲锋枪', en: 'DRYBRUSH SMG', slot: 1, dmg: 25, arm: .6, rate: .072, auto: true, mag: 30, res: 120, reload: 2.2, spread: .008, moveSp: .012, sprayInc: .0012, up: .0085, side: .0055, vm: .035, speed: .97, draw: .5, reward: 600, price: 1250, snd: 'smg', fall: .75, optic: 'reflex', adsFov: 70 },
-  nova:   { name: '泼墨 霰弹枪', en: 'SPLASH SHOTGUN', slot: 1, dmg: 20, pellets: 9, arm: .5, rate: .85, auto: false, mag: 8, res: 32, reload: 2.6, spread: .045, moveSp: .01, sprayInc: 0, up: .07, side: .015, vm: .16, speed: .93, draw: .6, reward: 900, price: 1050, snd: 'shotgun', fall: .55, fallStart: 6, range: 24, headMult: 2, penetration: 0, pump: true },
+  nova:   { name: '泼墨 霰弹枪', en: 'SPLASH SHOTGUN', slot: 1, dmg: 20, pellets: 9, arm: .62, rate: .7, auto: false, mag: 8, res: 32, reload: 2.6, spread: .045, moveSp: .01, sprayInc: 0, up: .07, side: .015, vm: .16, speed: .93, draw: .6, reward: 900, price: 1050, snd: 'shotgun', fall: .55, fallStart: 8, range: 30, headMult: 2, penetration: 0, pump: true },
   ak:     { name: 'AK 焦墨', en: 'AK CHARCOAL', slot: 1, dmg: 36, arm: .78, rate: .1, auto: true, mag: 30, res: 90, reload: 2.4, spread: .0022, moveSp: .05, sprayInc: .0011, up: .0135, side: .0085, vm: .06, speed: .9, draw: .6, reward: 300, price: 2700, snd: 'rifle', fall: .95 },
   m4:     { name: 'M4 工笔', en: 'M4 FINELINE', slot: 1, dmg: 31, arm: .7, rate: .092, auto: true, mag: 30, res: 90, reload: 2.7, spread: .0018, moveSp: .045, sprayInc: .0009, up: .0105, side: .006, vm: .045, speed: .92, draw: .6, reward: 300, price: 3100, snd: 'm4', fall: .95, optic: 'holo', adsFov: 64 },
   awp:    { name: '一笔 狙击枪', en: 'ONE STROKE', slot: 1, dmg: 95, arm: .82, rate: 1.65, auto: false, mag: 5, res: 25, reload: 3.3, spread: .0004, noScope: .08, moveSp: .16, sprayInc: 0, up: .06, side: .01, vm: .2, speed: .82, draw: .9, reward: 100, price: 4750, snd: 'awp', fall: 1, scope: true, bolt: true },
@@ -97,7 +97,7 @@ const GUNS = {
 };
 
 /* Functional layers remain in each moving part, so slides, magazines and pumps keep their choreography. */
-function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[key];
+function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[key]; meta.sightY = ({ ak: .08, lmg: .108, dmr: .078, nova: .075, deagle: .066, p9: .04, bow: .07 })[key];
   if (w.melee) { b.line([.012, .0, -.09, .012, .006, -.20, -.012, .0, -.09, -.012, .006, -.20]); return meta; }
   if (w.nade) { b.cyl(.023, .023, .015, 8, 0, -.035, 0, { tone: 1 }); inkBlock(b, .027, .04, .008, 0, .005, -.035, { tone: 0 }); b.line([-.008, .0, -.04, .008, .0, -.04, -.008, .009, -.04, .008, .009, -.04]); return meta; }
   const mz = meta.muzzle; b.cyl(meta.pistol ? .0044 : .0055, meta.pistol ? .0044 : .0055, .0015, 10, 0, mz[1], -mz[0] - .001, { ax: 'z', tone: 1, edges: false });
@@ -183,6 +183,6 @@ const VM = { off: {},
     if (this.atk < 1) { this.atk = Math.min(1, this.atk + dt / (this.atkKind ? .5 : .3)); const k = Math.sin(this.atk * Math.PI);
       if (meta.nade) { z -= k * .22; y += k * .1; rx -= k * .8; } else if (this.atkKind) { z -= k * .28; rx -= k * .3; ry -= k * .5; } else { x -= k * .2; ry += k * 1.0; rz += k * .6; z -= k * .08; } }
     if (this.insp < 1) { this.insp = Math.min(1, this.insp + dt / 2.6); const k = Math.sin(this.insp * Math.PI), q = Math.sin(this.insp * 6.2832); ry += k * .95; rz += q * .4; x -= k * .06; y += k * .025; rx += k * .15; }
-    this.ads = damp(this.ads || 0, pl.scoped && w.optic ? 1 : 0, 18, dt); const ad = this.ads, sk = typeof SKIN !== 'undefined' && SKIN.on; x = x * (1 - ad) + (sk ? .012 : 0) * ad; y = y * (1 - ad) + (-(meta.opticY || .118) - this.kick * .04 - (sk ? .03 : 0)) * ad; z = z * (1 - ad) - .44 * ad; rx *= 1 - ad * .9; ry *= 1 - ad; rz *= 1 - ad; r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0 && w.scope) && pl.alive;
+    this.ads = damp(this.ads || 0, pl.scoped && !w.scope && !w.melee && !w.nade ? 1 : 0, 18, dt); const ad = this.ads, sk = typeof SKIN !== 'undefined' && SKIN.on, dotA = !w.optic && pl.att && pl.att.dot && !w.adsFov && !meta.pistol, iron = !w.optic && !dotA, sy = w.optic ? (meta.opticY || .118) : dotA ? (meta.opticY || .06) + .034 : (meta.sightY || .08); x *= 1 - ad; y = y * (1 - ad) + (-sy - this.kick * .04 - (sk && iron ? .006 : 0)) * ad; z = z * (1 - ad) - (meta.pistol ? .52 : .44) * ad; rx *= 1 - ad * .9; ry *= 1 - ad; rz *= 1 - ad; r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0 && w.scope) && pl.alive;
   }
 };

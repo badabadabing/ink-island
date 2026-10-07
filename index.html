@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>咸鱼岛 SALTY ISLE</title>
-<link href="vendor/fonts/fonts.css?v=d19" rel="stylesheet">
+<link href="vendor/fonts/fonts.css?v=d39" rel="stylesheet">
 <style>
 :root{--paper:#f5f2ea;--ink:#16161c;--red:#d42a2a;--amber:#e9a520;--blue:#2d6cb3;--grey:#9a978f}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
@@ -83,7 +83,7 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .invHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px} .invHead h2{margin:0} .cnt{font-size:11px;letter-spacing:1px;opacity:.75;float:right} #invCap.full{color:var(--red);opacity:1}
 .invTabs{display:none;gap:0} .invTabs button{padding:6px 14px;font-size:12px;border-right-width:0} .invTabs button:last-child{border-right-width:2px} .invTabs button.sel{background:var(--ink);color:var(--paper)}
 .invCols3{display:grid;grid-template-columns:1fr 1.05fr 1.35fr;gap:18px;align-items:start} .invCol{min-width:0} #inv h3{font-size:11px;letter-spacing:4px;margin:2px 0 6px;opacity:.7}
-.invList{max-height:56vh;overflow:auto;border-top:1px solid rgba(22,22,28,.2);scrollbar-width:thin;scrollbar-color:var(--ink) transparent;-webkit-mask-image:linear-gradient(#000 calc(100% - 18px),transparent)} .invList::-webkit-scrollbar{width:4px} .invList::-webkit-scrollbar-thumb{background:var(--ink)} #invCapBar{height:8px;background:rgba(22,22,28,.12);margin:0 0 6px;background-image:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(22,22,28,.45) calc(25% - 1px) 25%)} #invCapBar i{display:block;height:100%;background:var(--ink)} #invCapBar.full i{background:var(--red)}
+.invList{max-height:max(240px,calc(100vh - 236px));overflow:auto;border-top:1px solid rgba(22,22,28,.2);-webkit-mask-image:linear-gradient(#000 calc(100% - 18px),transparent)} .invList::-webkit-scrollbar{width:6px} .invList::-webkit-scrollbar-track{background:rgba(46,58,89,.12);border-radius:3px} .invList::-webkit-scrollbar-thumb{background:var(--ink);border-radius:3px} @supports not selector(::-webkit-scrollbar){.invList{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(46,58,89,.12)}} #invCapBar{height:8px;background:rgba(22,22,28,.12);margin:0 0 6px;background-image:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(22,22,28,.45) calc(25% - 1px) 25%)} #invCapBar i{display:block;height:100%;background:var(--ink)} #invCapBar.full i{background:var(--red)}
 .key{display:inline-block;width:15px;height:15px;line-height:13px;text-align:center;border:1px solid var(--ink);font-size:9px;margin-right:4px;vertical-align:1px} .up{display:inline-block;font-size:9px;letter-spacing:1px;color:var(--paper);background:var(--red);padding:0 4px;margin-left:4px;vertical-align:1px} .more{border-width:1.5px;padding:1px 6px;font-size:11px;margin-left:4px;opacity:.75} .it .sub{display:none;margin-top:3px} .it.open .sub{display:block} .it.open .more{background:var(--ink);color:var(--paper)}
 body.dragG #invBag,body.dragG #invGear .slot.empty,body.dragG #invGear .gcard.empty{outline:2px dashed var(--blue);outline-offset:3px} body.dragB #invG{outline:2px dashed var(--blue);outline-offset:3px} body.dragG #invG,body.dragB #invBag,body.dragB #invGear{opacity:.5}
 .it{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid rgba(22,22,28,.14);cursor:grab} .it img{width:44px;height:44px;object-fit:contain;background:rgba(22,22,28,.04);border:1px solid rgba(22,22,28,.28);flex:none} .it.gun img{width:96px;height:36px} .itT{flex:1;min-width:0;font-size:12px;line-height:1.3} .itT b{display:block;font-weight:600} .itT small{opacity:.65;font-size:10.5px} .itB{flex:none;white-space:nowrap}
@@ -158,13 +158,13 @@ body.touch .desktopOnly{display:none}
 .tb.hint{background:var(--amber);border-color:var(--ink)}
 #tFire{right:120px;bottom:20px} #tFire2{left:46%;bottom:40px;width:70px;height:70px;font-size:13px} #tAim{right:150px;bottom:130px} #tJump{right:76px;bottom:120px} #tReload{right:224px;bottom:100px} #tUse{right:230px;bottom:20px;width:70px;height:70px}
 #tSwap{right:224px;bottom:176px} #tMode{right:150px;bottom:204px} #tNade{right:300px;bottom:170px;width:50px;height:50px;font-size:11px} #tThrow{right:310px;bottom:84px}
-#tSprint{left:290px;bottom:100px;width:52px;height:52px} #tCrouch{left:12px;bottom:100px;width:52px;height:52px} #tProne{left:12px;bottom:162px;width:52px;height:52px}
+#tSprint{left:12px;bottom:224px;width:52px;height:52px} #tCrouch{left:12px;bottom:100px;width:52px;height:52px} #tProne{left:12px;bottom:162px;width:52px;height:52px}
 #tMap{top:12px;right:16px} #tBag{top:12px;right:80px} #tPause{top:12px;right:150px} #tBand{top:124px;right:16px} #tPill{top:124px;right:80px}
 #replayTag{position:fixed;left:50%;top:18px;transform:translateX(-50%);display:none;padding:6px 16px 8px;border:2px solid var(--ink);background:var(--paper);font-size:12px;letter-spacing:3px;z-index:5;cursor:pointer;text-align:center} #replayTag.on{display:block} #replayTag .bar{height:3px;background:rgba(22,22,28,.2);margin-top:6px} #replayTag .bar i{display:block;height:100%;background:var(--blue);width:0}
 #brainFoot{margin-top:10px;color:var(--blue)} #brainFoot button{margin-left:6px} .brainNote{margin-top:10px;font-size:11px;letter-spacing:1px;color:var(--blue)}
 body.touch #help,body.touch #captureMouse{display:none!important}
 body.touch #top div{min-width:84px;padding:3px 8px} body.touch #top b{font-size:18px}
-body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch #ammoBox{transform:scale(.72);transform-origin:right bottom;right:8px;bottom:8px;max-width:150px} body.touch #wen{display:none} body.touch #wname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} body.touch #slots{flex-wrap:wrap;row-gap:4px} body.touch #slots span{white-space:nowrap}
+body.touch #meds{display:none} body.touch #hpBox{transform:scale(.72);transform-origin:left bottom} body.touch #radarBox{transform:scale(.7);transform-origin:left top} body.touch.skin #zone{left:100%;top:auto;bottom:4px;transform:none;margin:0 0 0 6px} body.touch #ammoBox{transform:scale(.72);transform-origin:right bottom;right:8px;bottom:8px;max-width:150px} body.touch #wen{display:none} body.touch #wname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} body.touch #slots{flex-wrap:wrap;row-gap:4px} body.touch #slots span{white-space:nowrap}
 body.touch #pickup{left:50%;top:auto;bottom:156px;transform:translateX(-50%);align-items:center;font-size:12px}
 body.touch #pickup b,body.touch .ltag kbd{display:none}
 body.touch #feed{top:176px}
@@ -201,7 +201,7 @@ body.skin #start.cta{font-size:20px;padding:16px 28px;border-radius:18px;box-sha
 /* HUD */
 body.skin #top div{border:3px solid var(--ink);border-radius:16px;background:var(--paper);box-shadow:0 4px 0 var(--ink);padding:4px 16px 6px}
 body.skin #top b{font-size:26px;color:var(--ink)} body.skin #top small{font-weight:800;letter-spacing:2px;color:var(--teal)}
-body.skin #timer.warn{color:var(--red)}
+body.skin #timer.warn{color:var(--red)} #phase.late,body.skin #phase.late{color:var(--red);font-weight:800}
 body.skin #radarBox{border-radius:50%;border:4px solid var(--ink);box-shadow:0 5px 0 var(--ink),0 0 0 6px var(--paper) inset;overflow:hidden}
 body.skin .bar{border:3px solid var(--ink);border-radius:999px;background:#fff1d6;overflow:hidden;height:14px}
 body.skin .bar i{background:linear-gradient(180deg,#9ee09a,var(--leaf));border-radius:999px}
@@ -227,7 +227,7 @@ body.skin .key{color:var(--teal);font-weight:900;letter-spacing:3px}
 body.skin .it{border-bottom:2px dotted rgba(46,58,89,.18);border-radius:10px;padding:6px}
 body.skin .it:hover{background:#fff1d6}
 body.skin .it img{border:2.5px solid var(--ink);border-radius:12px;background:radial-gradient(circle at 35% 30%,#ffffff,#dceff4);box-shadow:0 2px 0 var(--ink)}
-body.skin .it.gun img{background:radial-gradient(ellipse at 35% 30%,#ffffff,#fff1d6)}
+body.skin .it.gun img{background:radial-gradient(ellipse at 35% 30%,#ffffff,#fff1d6)} body.skin .it{padding:3px 6px} body.skin .it img{width:36px;height:36px} body.skin .it.gun img{width:84px;height:30px} body.skin .itT{line-height:1.2}
 body.skin .slot{border:3px solid var(--ink);border-radius:16px;background:rgba(255,248,236,.9);box-shadow:0 3px 0 var(--ink)} body.skin .slot.cur{background:#fff1d6;box-shadow:0 5px 0 var(--ink)} body.skin .slot.empty{border-style:dashed;box-shadow:none}
 body.skin .gcard{border:3px solid var(--ink) !important;border-radius:16px;background:rgba(255,248,236,.9);box-shadow:0 3px 0 var(--ink)} body.skin .gcard.empty{border-style:dashed !important;box-shadow:none}
 body.skin .chips span{border-radius:999px !important}
@@ -247,7 +247,7 @@ body.skin #zone{position:absolute;left:50%;top:100%;transform:translateX(-50%);m
 body.skin #hpBox{background:var(--paper);border:3px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);padding:8px 14px 10px}
 body.skin .stat .lab{font-weight:900;color:var(--teal);letter-spacing:2px}
 body.skin .stat .big{text-shadow:none}
-body.skin #help{max-width:56vw;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;background:rgba(255,248,236,.92);border:2.5px solid var(--ink);border-radius:999px;padding:3px 14px;opacity:.9;transition:opacity 1.2s}
+body.skin #help{max-width:56vw;overflow:hidden;text-overflow:ellipsis;font-size:12px;background:rgba(255,248,236,.92);border:2.5px solid var(--ink);border-radius:999px;padding:3px 14px;opacity:.9;transition:opacity 1.2s}
 body.skin #help.fade{opacity:0}
 body.skin #radarBox{box-shadow:0 5px 0 var(--ink);outline:5px solid var(--paper);outline-offset:0}
 body.skin #zone{font-weight:900;color:var(--ink);background:var(--paper);border:2.5px solid var(--ink);border-radius:999px;padding:1px 10px;display:inline-block;margin-top:8px}
@@ -299,7 +299,7 @@ body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opac
 #menu.ov.on{overflow:hidden;align-items:center;padding:12px} #menu.ov.on>.panel.menuP{max-height:calc(100dvh - 24px);overflow-y:auto;margin:auto}
 /* d28 review: pickup / notice banner stays on one line; key help never runs into the weapon slots; end card scrolls inside the screen */
 body.skin #banner #bannerT{white-space:nowrap;max-width:62vw;overflow:hidden;text-overflow:ellipsis;font-size:clamp(18px,2.4vw,30px)}
-#help{max-width:min(560px,calc(100vw - 760px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis} @media (max-width:1100px){#help{display:none}}
+body.skin #help,#help{max-width:min(560px,calc(100vw - 880px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis} @media (max-width:1100px){#help:not(.hint){display:none}} body #help.hint{opacity:.95!important;max-width:calc(100vw - 40px)!important;font-size:13px}
 #end.on>.panel,#dead.on>.panel{max-height:calc(100dvh - 24px);overflow-y:auto} body.skin #endT,body.skin #deadT{word-break:keep-all;font-size:clamp(22px,2.6vw,30px)}
 /* d37 controls feel: HUD stays readable over the scope, side posts on the reticle, reload tint, calmer HUD while fighting */
 body.skin #fx{z-index:2} body.skin #scope{z-index:1} body.skin #hud{z-index:3}
@@ -346,7 +346,7 @@ body.skin.touch #gear{top:122px;bottom:auto;align-items:flex-start} body.skin.to
   <div id="gear"><span id="gVest">甲 0</span><span id="gHelm">盔 0</span><span id="gBag">包 0</span><span id="gScope"></span></div>
   <div id="meds"><span id="m_band">7 绷带 <b>0</b></span><span id="m_kit">8 急救 <b>0</b></span><span id="m_medkit">9 医疗箱 <b>0</b></span><span id="m_pill">0 止痛 <b>0</b></span><span id="m_drink">- 饮料 <b>0</b></span><span id="m_adren">= 肾上腺素 <b>0</b></span></div>
   <div id="banner"><div id="bannerT"></div><div id="bannerS"></div></div>
-  <div id="help">WASD 移动 · SHIFT 冲刺 · Q/E 探头 · ALT 自由视角 · C 蹲 · Z 趴 · 空格 跳/攀爬 · 左键 开火 · 右键 瞄准 · B 单连发 · R 换弹 · F 拾取/上车/开箱 · G/4 投掷物 · 7-0 - = 药品 · TAB 背包 · M 地图(点击标记) · ESC 暂停</div>
+  <div id="help">TAB 背包 · M 地图 · F 拾取/上车/开箱 · 右键 瞄准 · R 换弹 · G/4 投掷物 · C 蹲 · Z 趴 · 空格 跳/攀爬 · SHIFT 冲刺 · 7-0 - = 药品 · ESC 暂停</div>
 </div>
 <button id="captureMouse" class="pri" hidden>点击进入鼠标控制</button>
 
