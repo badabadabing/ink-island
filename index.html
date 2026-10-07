@@ -295,6 +295,11 @@ body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opac
 body.skin #banner #bannerT{white-space:nowrap;max-width:62vw;overflow:hidden;text-overflow:ellipsis;font-size:clamp(18px,2.4vw,30px)}
 #help{max-width:min(560px,calc(100vw - 760px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis} @media (max-width:1100px){#help{display:none}}
 #end.on>.panel,#dead.on>.panel{max-height:calc(100dvh - 24px);overflow-y:auto} body.skin #endT,body.skin #deadT{word-break:keep-all;font-size:clamp(22px,2.6vw,30px)}
+/* d36 scope picture in the sticker style: a navy body ring, a cream lens rim, faint sea-blue glass tint, a coral chevron reticle with a stadia line */
+body.skin #scope{background:radial-gradient(circle at center,rgba(159,216,232,.10) 0,rgba(159,216,232,.10) 35vh,#fff6e6 35.3vh,#fff6e6 36.6vh,#2e3a59 36.9vh)}
+body.skin #scope::before{width:2px;height:28vh;top:auto;bottom:13vh;transform:translateX(-50%);background:#2e3a59}
+body.skin #scope::after{width:0;height:0;background:none;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:12px solid #ff5a4e;transform:translate(-50%,0);filter:drop-shadow(0 1px 0 #2e3a59)}
+body.skin #scope.on~#xh,body.skin #scope.on~.xh{opacity:0}
 /* d20 real-device fixes (iPhone Safari): grid tracks may shrink below their content so the menu never overflows the panel edge */
 .cardRow{grid-template-columns:repeat(3,minmax(0,1fr))} .cardRow.two{grid-template-columns:repeat(2,minmax(0,1fr))} .cardRow button{min-width:0}
 @media (max-width:900px){#menu .panel.menuP{grid-template-columns:minmax(0,1fr)} #menu .panel.menuP>*{min-width:0}}

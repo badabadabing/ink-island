@@ -1,6 +1,6 @@
 'use strict';
 /* ============ INK ISLAND · gunskin: paint + one joke accessory per gun, and new throwables (fish-bomb tin, flash conch, squid smoke, hot-sauce bottle). Wraps finishGun, so ground models, third-person guns, icons and the first-person view all match. Gun-local space: forward = -Z, muzzle at (0, meta.muzzle[1], -meta.muzzle[0]) ============ */
-const GUNPAL = { ak: 0x2e5a7a, m4: 0xf7f5ef, viper: 0x2fa6a0, nova: 0xb98a58, awp: 0x3a5a8c, dmr: 0xc99a62, lmg: 0xc8372d, p9: 0xff8f7a, deagle: 0xe2483b, bow: 0x8fc96a, knife: 0xdfe7ea };
+const GUNPAL = { ak: 0x2e5a7a, m4: 0xd8dee6, viper: 0x2fa6a0, nova: 0xb98a58, awp: 0x3a5a8c, dmr: 0xc99a62, lmg: 0xc8372d, p9: 0xff8f7a, deagle: 0xe2483b, bow: 0x8fc96a, knife: 0xdfe7ea };
 const GS = { brass: 0xd9a441, rope: 0xe9d6a8, red: 0xd94c3d, gold: 0xffd23f, white: 0xfffdf7, black: 0x1a1a22, pink: 0xff8f7a, teal: 0x2fa6a0, cork: 0xd9b26a, steel: 0xb9c6cc, leaf: 0x58b872 };
 function gsTorus(s, r, t, x, y, z, tint, rot, arc = Math.PI * 2, sy = 1) { const g = new THREE.TorusGeometry(r, t, 5, 12, arc); g.scale(1, sy, 1); s.add(g, s._m(x, y, z, rot), { tone: 0, edges: false, tint }); }
 function gsCone(s, r, h, x, y, z, tint, rot, seg = 8) { s.add(new THREE.ConeGeometry(r, h, seg), s._m(x, y, z, rot), { tone: 0, edges: false, tint }); }
