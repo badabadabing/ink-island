@@ -45,5 +45,9 @@ function quickHeal() { const pl = G.player; if (!pl || !pl.alive || pl.heal || G
   /* phones start on the light preset (unless the player picked one); the light preset also drops the sun's shadow pass */
   try { const saved = JSON.parse(localStorage.getItem('inkisland') || '{}'); if (saved.quality === undefined && (matchMedia('(pointer: coarse)').matches || /[?&]touch/.test(location.search))) G.set.quality = 'low'; } catch (er) { }
   { const _aq = applyQuality; applyQuality = function () { _aq(); const on = G.set.quality !== 'low'; if (renderer.shadowMap.enabled !== on) { renderer.shadowMap.enabled = on; if (typeof SKIN !== 'undefined' && SKIN.sun) SKIN.sun.castShadow = on; if (typeof FILL_MATS !== 'undefined') for (const m of FILL_MATS) m.needsUpdate = true; } }; }
+  /* d30 actor LOD for 50-player matches: bots beyond 70 m animate every other frame, beyond 150 m on the light preset they are not drawn (position still follows) */
+  { const _an = animSoldier; let fN = 0; animSoldier = function (e, dt) { if (e.isPlayer || !e.model || typeof camera === 'undefined') return _an(e, dt); const m = e.model, d2 = (e.pos.x - camera.position.x) ** 2 + (e.pos.z - camera.position.z) ** 2;
+      if (e.alive && G.set.quality === 'low' && d2 > 150 * 150 && !e.air) { m.root.visible = false; m.lodHid = true; m.root.position.copy(e.pos); return; } if (m.lodHid) { m.lodHid = false; m.root.visible = true; }
+      if (e.alive && d2 > 70 * 70 && !e.veh && !e.air) { m.lodAcc = (m.lodAcc || 0) + dt; if ((++m.lodN & 1) === 1 || isNaN(m.lodN)) { m.lodN = m.lodN || 1; m.root.position.copy(e.pos); m.root.rotation.y = e.yaw; return; } const t = m.lodAcc; m.lodAcc = 0; return _an(e, t); } return _an(e, dt); }; }
   const hp = $('help'); if (hp) hp.textContent = hp.textContent.replace('F 拾取/上车/开箱', 'F 拾取/上车/开箱 · H 快速治疗 · 有用的东西自动捡');
 })();

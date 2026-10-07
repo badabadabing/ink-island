@@ -7,7 +7,7 @@ const ISL_NAMES = {
   band: ['海带绷带'], kit: ['急救饭盒'], medkit: ['村医药箱'], pill: ['薄荷糖'], drink: ['椰子水'], adren: ['辣椒针'],
   s2: ['二倍 竹筒镜'], s4: ['四倍 竹筒镜'], dot: ['红豆 镜'], sup: ['棉袜 消音器'], comp: ['漏斗 补偿器'], grip: ['擀面杖 握把'], xmag: ['罐头 弹匣'], stock: ['船桨 枪托'], ghillie: ['海草 伪装衣'] };
 const ISL_TOWNS = { yard: ['晒鱼场', 'FISH-DRYING YARD'], farm: ['咸鱼农庄', 'SALTFISH FARM'], print: ['老罐头厂', 'OLD CANNERY'], obs: ['山顶天文台', 'HILLTOP OBSERVATORY'] };
-const ISL_BOTS = ['阿咸', '大虾', '老蚝', '小螺', '跳跳鱼', '阿蟹', '海胆', '鱿鱼干', '沙丁', '带鱼', '花蛤', '海带', '小鲍', '阿蛎', '黄鱼', '马鲛', '石斑', '墨鱼仔', '海蜇', '鳗鱼', '小虾米', '老龟', '鲳鱼', '紫菜'];
+const ISL_BOTS = ['阿咸', '大虾', '老蚝', '小螺', '跳跳鱼', '阿蟹', '海胆', '鱿鱼干', '沙丁', '带鱼', '花蛤', '海带', '小鲍', '阿蛎', '黄鱼', '马鲛', '石斑', '墨鱼仔', '海蜇', '鳗鱼', '小虾米', '老龟', '鲳鱼', '紫菜', '扇贝', '海星', '章鱼哥', '小黄花', '比目鱼', '秋刀', '海参', '皮皮虾', '蛏子', '泥鳅', '河豚', '鲅鱼', '海螺', '虾皮', '鱼丸', '咸鱼干', '海鸥', '螃蟹王', '小海马', '珊瑚', '鲨鲨', '鳕鱼', '龙虾', '蛤蜊', '牡蛎', '鲣鱼', '金枪', '海葵'];
 const ISL_WIN = ['咸鱼翻身 · 全岛就你还站着', '一网打尽 · 今晚全村吃鱼', '潮水退了 · 沙滩上只剩你', '斗笠不倒 · 这岛归你了', '渔港霸主 · 海鸥都怕你'];
 if (typeof SKIN !== 'undefined' && SKIN.on) {
   for (const k in ISL_NAMES) { const [n, en] = ISL_NAMES[k]; if (typeof WEAPONS !== 'undefined' && WEAPONS[k]) { WEAPONS[k].name = n; if (en) WEAPONS[k].en = en; } if (typeof ITEMS !== 'undefined' && ITEMS[k]) { ITEMS[k].name = n; if (en) ITEMS[k].en = en; } }
