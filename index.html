@@ -291,6 +291,10 @@ body.skin .cardRow button small{display:block;font-size:12px;letter-spacing:0;wh
 body.skin #end .btns,body.skin #dead .btns{padding:12px 0 14px;margin-bottom:0;box-shadow:0 -10px 12px -6px var(--paper);z-index:1}
 body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opacity:.35}
 #menu.ov.on{overflow:hidden;align-items:center;padding:12px} #menu.ov.on>.panel.menuP{max-height:calc(100dvh - 24px);overflow-y:auto;margin:auto}
+/* d28 review: pickup / notice banner stays on one line; key help never runs into the weapon slots; end card scrolls inside the screen */
+body.skin #banner #bannerT{white-space:nowrap;max-width:62vw;overflow:hidden;text-overflow:ellipsis;font-size:clamp(18px,2.4vw,30px)}
+#help{max-width:min(560px,calc(100vw - 760px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis} @media (max-width:1100px){#help{display:none}}
+#end.on>.panel,#dead.on>.panel{max-height:calc(100dvh - 24px);overflow-y:auto} body.skin #endT,body.skin #deadT{word-break:keep-all;font-size:clamp(22px,2.6vw,30px)}
 /* d20 real-device fixes (iPhone Safari): grid tracks may shrink below their content so the menu never overflows the panel edge */
 .cardRow{grid-template-columns:repeat(3,minmax(0,1fr))} .cardRow.two{grid-template-columns:repeat(2,minmax(0,1fr))} .cardRow button{min-width:0}
 @media (max-width:900px){#menu .panel.menuP{grid-template-columns:minmax(0,1fr)} #menu .panel.menuP>*{min-width:0}}
