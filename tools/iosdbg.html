@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>dbg</title>
+<style>body{margin:0;font:12px monospace}iframe{width:100vw;height:55vh;border:0}pre{white-space:pre-wrap;padding:6px;margin:0;background:#fff}</style>
+<iframe id="f" src="../index.html?dbg"></iframe><pre id="o">waiting</pre>
+<script>
+setTimeout(() => { const d = document.getElementById('f').contentWindow, doc = d.document, q = s => doc.querySelector(s), cs = (s, ks) => { const e = q(s); if (!e) return s + ': none'; const c = d.getComputedStyle(e); return s + ': ' + ks.map(k => k + '=' + c[k]).join(' | ') + ' | rect=' + JSON.stringify(e.getBoundingClientRect()); };
+  document.getElementById('o').textContent = [ 'body: ' + doc.body.className + ' vw=' + d.innerWidth, cs('#optDiff button.sel', ['backgroundColor', 'color', 'opacity', 'webkitTextStroke']), cs('#optDiff button', ['backgroundColor', 'color']), cs('#menu .panel', ['width', 'maxWidth', 'paddingLeft', 'paddingRight', 'boxSizing']), cs('#menu', ['paddingLeft', 'paddingRight', 'alignItems']), 'docW=' + doc.documentElement.scrollWidth ].join('\n'); }, 9000);
+</script>

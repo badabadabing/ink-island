@@ -63,6 +63,9 @@
 - 暂不做：`sim.step(state, inputs)` 纯函数化（无联机计划时成本过高）、平台能力层（无小程序发布计划）。有计划时先做这两条再加功能。
 
 ## 沉淀的教训
+- 2026-10-07 真机测试：内置浏览器面板被隐藏时页面 rAF 冻结（G.now 不走），长时间实测改用 scratchpad 的 realplay（Playwright + Metal GPU，关后台节流）注入 `tools/autopilot.js`；iPhone 用 `xcrun simctl openurl` + `io screenshot`，加 `?go` 自动开局；看计算样式用 `tools/iosdbg.html`。
+- 2026-10-07 静态资源（css/字体）改了要加版本号，`fonts.css` 曾被缓存成旧版导致新字体在真机不生效；`?v=` 只给 JS 加了。
+- 2026-10-07 CSS 同时给一个绝对定位元素设 top 和 bottom（两套规则叠加）会把它拉成长柱：touch 规则改位置时要显式 `bottom:auto`。
 - 2026-10-07 手臂改成两段 IK 后，别的文件直接写 `armR.rotation` 的姿势（载具、梯子、结算、坐着的钓鱼人）都会被 pose.js 覆盖或含义改变：新姿势一律写成「手的目标点 + 肘部朝向」交给 `islArmIK`/`poseArm`，不要再写肩关节欧拉角。
 - 2026-10-07 截图探针里玩家死了会走死亡镜头、改写 camera；探针要么让玩家活着藏起来，要么在同一次 evaluate 里 render 后立刻 `toDataURL` 取图。
 - 2026-10-07 对局进行中的状态是 `G.state === 'live'`（不是 'play'）：handy.js 第一版写成 'play'，自动拾取和快速治疗全部静默失效，探针才查出来。

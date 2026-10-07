@@ -20,6 +20,11 @@ function poseDamp(o, k, v, r, dt) { o[k] += (v - o[k]) * (1 - Math.exp(-r * dt))
     const sp = Math.hypot(m.vx || 0, m.vz || 0), gw = Math.min(1, Math.max(0, (sp - .12) / .55)), run = Math.min(1, Math.max(0, (sp - 2.9) / 1.7)), ph = (m.gait || 0) * 6.2832, sw = Math.sin(ph) * gw;
     /* dead: arms go limp where they are */
     if (!e.alive) { poseArm(m, 1, R.x + .05, R.y - .5, R.z + .12, 0, -.2, 1, dt, 4); poseArm(m, -1, L.x - .05, L.y - .5, L.z + .1, 0, -.2, 1, dt, 4); return; }
+    /* swimming: body flat at the surface, pivoting at the hips so the hitbox and camera stay put; front crawl arms, flutter kick, head up */
+    if (!e.veh && !e.air && !e.climb && typeof inWater === 'function' && inWater(e)) { const th = -1.2, fy = -Math.sin(e.yaw), fz = -Math.cos(e.yaw), off = .9 * Math.sin(-th); m.root.rotation.set(th, e.yaw, 0, 'YXZ'); m.root.position.set(e.pos.x - fy * off, Math.max(e.pos.y, MAP.sea - .5), e.pos.z - fz * off); g.visible = false; m.head.rotation.set(-1.0, 0, 0); m.upper.rotation.set(0, Math.sin(t * 3.2) * .12, 0);
+      const sw2 = t * 3.2; for (const [side, a] of [[1, sw2], [-1, sw2 + Math.PI]]) { const S = side > 0 ? R : L, c = Math.cos(a), s2 = Math.sin(a); poseArm(m, side, S.x + side * (.06 + .1 * Math.max(0, -s2)), S.y + .25 + .32 * c, S.z - .08 + .26 * Math.max(0, s2), side * .5, .2, 1, dt, 20); }
+      for (const [Lg, ph2] of [[m.legL, 0], [m.legR, Math.PI]]) { Lg.rotation.set(Math.sin(t * 9 + ph2) * .28, 0, 0, 'ZXY'); Lg.shin.rotation.x = -.15 - Math.max(0, Math.sin(t * 9 + ph2)) * .3; Lg.foot.rotation.set(.9, 0, 0, 'XZY'); } m.wasSwim = true; return; }
+    if (m.wasSwim) { m.wasSwim = false; g.visible = true; m.root.rotation.x = 0; m.root.rotation.z = 0; }
     /* ladder: hands on the rails, alternating rungs */
     if (e.climb) { const a = Math.sin((e.climb.phase || 0) * 2.6); g.visible = false; poseArm(m, 1, .2, .9 + a * .14, -.3, .6, -.3, .4, dt, 18); poseArm(m, -1, -.2, .9 - a * .14, -.3, -.6, -.3, .4, dt, 18); return; }
     /* vehicles: wheel, handlebars, or a hand on the tiller */

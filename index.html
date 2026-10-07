@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>咸鱼岛 SALTY ISLE</title>
-<link href="vendor/fonts/fonts.css" rel="stylesheet">
+<link href="vendor/fonts/fonts.css?v=d19" rel="stylesheet">
 <style>
 :root{--paper:#f5f2ea;--ink:#16161c;--red:#d42a2a;--amber:#e9a520;--blue:#2d6cb3;--grey:#9a978f}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
@@ -290,6 +290,11 @@ body.skin #menu h3{font-size:14px}
 body.skin .cardRow button small{display:block;font-size:12px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.skin #end .btns,body.skin #dead .btns{padding:12px 0 14px;margin-bottom:0;box-shadow:0 -10px 12px -6px var(--paper);z-index:1}
 body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opacity:.35}
+/* d20 real-device fixes (iPhone Safari): grid tracks may shrink below their content so the menu never overflows the panel edge */
+.cardRow{grid-template-columns:repeat(3,minmax(0,1fr))} .cardRow.two{grid-template-columns:repeat(2,minmax(0,1fr))} .cardRow button{min-width:0}
+@media (max-width:900px){#menu .panel.menuP{grid-template-columns:minmax(0,1fr)} #menu .panel.menuP>*{min-width:0}}
+body.skin.touch #gear{top:122px;bottom:auto;align-items:flex-start} body.skin.touch #weaponState{bottom:auto;top:156px}
+@media (max-width:560px){body.skin .cardRow button small{white-space:normal;overflow:visible} body.skin .cardRow button b{font-size:19px}}
 </style>
 </head>
 <body>
