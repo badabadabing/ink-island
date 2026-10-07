@@ -148,7 +148,7 @@ function buildWorld(root) {
   MAP.spawn = { player: { x: TOWNS[0].x, z: TOWNS[0].z + 27 } }; MAP.menuCamera = { x: -60, y: 90, z: 260, tx: 0, ty: 0, tz: 0 };
 }
 /* distance LOD, chosen per quality tier: grass and other fine detail fades out first, then the ink lines of far chunks (the paper fill stays, so the silhouette never vanishes) */
-const LOD = { grass: 150, lines: 420, tiers: { low: [90, 220], balanced: [150, 420], high: [260, 1e9] } };
+const LOD = { grass: 150, lines: 420, tiers: { low: [70, 220], balanced: [150, 420], high: [260, 1e9] } };
 MAP.setDetail = q => { const t = LOD.tiers[q] || LOD.tiers.balanced; LOD.grass = t[0]; LOD.lines = t[1]; };
 MAP.lod = (cx, cz) => { const g2 = LOD.grass * LOD.grass, l2 = LOD.lines * LOD.lines; for (const c of MAP.chunks) { if (!c.g) continue; const d2 = (c.cx - cx) ** 2 + (c.cz - cz) ** 2; c.gd.visible = d2 < g2; if (c.g.ink) c.g.ink.visible = d2 < l2; } };
 /* window panes: one instanced sheet of glass, hidden pane by pane as they break */
