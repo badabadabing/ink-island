@@ -141,7 +141,7 @@ function updatePlayer(dt) {
   if (ready && now >= pl.nextFire) {
     if (w.melee) { if (G.fire || G.alt) { const heavy = !G.fire; pl.nextFire = now + (heavy ? w.rate2 : w.rate); VM.atk = 0; VM.atkKind = heavy ? 1 : 0; pl.atkAnim = .32; SFX.swish(); pl.pending = { t: now + (heavy ? .16 : .09), fn: () => melee(pl, heavy ? w.dmg2 : w.dmg) }; } }
     else if (w.nade) { const kind = pl.cur; if (G.fireEdge && pl.nades[kind] > 0 && !free) { pl.nextFire = now + 1; VM.atk = 0; pl.pending = { t: now + .2, fn: () => { throwNade(pl, kind); pl.nades[kind]--; if (pl.nades[kind] <= 0) switchTo(nadeList(pl)[0] || pl.inv[1] || pl.inv[2] || 'knife'); } }; } }
-    else if (((w.auto && pl.modes[pl.cur] !== 'single') ? G.fire : G.fireEdge) && !pl.wet && !free) { const a = pl.ammo[pl.cur]; if (a.mag > 0) playerFire(pl, w, a); else { if (G.fireEdge) SFX.click(1600, .25); if (a.res > 0) startReload(); } }
+    else if (((w.auto && pl.modes[pl.cur] !== 'single') ? (G.fire || G.fireEdge) : G.fireEdge) && !pl.wet && !free) { const a = pl.ammo[pl.cur]; if (a.mag > 0) playerFire(pl, w, a); else { if (G.fireEdge) SFX.click(1600, .25); if (a.res > 0) startReload(); } }
   }
   if (pl.ammo[pl.cur] && pl.ammo[pl.cur].mag === 0 && pl.ammo[pl.cur].res > 0 && pl.reloadEnd < 0 && now > pl.nextFire && ready) startReload();
   pl.spread = curSpread(pl, w);

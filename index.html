@@ -260,7 +260,7 @@ body.skin #loading{background:#9fd3ec;color:var(--ink);font-weight:900}
 .ov.on>.panel{margin:auto;flex-shrink:0;max-width:calc(100vw - 24px)}
 #keys,#end{z-index:9}
 #keys .panel.keysP{max-width:calc(100vw - 24px)}
-@media (max-height:620px){.ov .panel{padding-bottom:18px}body.skin .ov .panel,body.skin #menu .panel.menuP{padding-top:46px !important}.ov h2{font-size:24px;margin-bottom:6px}#menu .panel.menuP{max-height:none}}
+@media (max-height:620px){.ov .panel{padding-bottom:18px}body.skin .ov .panel,body.skin #menu .panel.menuP{padding-top:46px !important}.ov h2{font-size:24px;margin-bottom:6px}}
 /* d18 type: hand-painted harbour-sign lettering (Ma Shan Zheng) for titles, primary buttons and banners, warm handwritten LXGW WenKai Bold for all other text; numbers stay rounded heavy */
 body.skin{font-family:"LXGW WenKai","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;font-weight:700;-webkit-font-smoothing:antialiased}
 body.skin button,body.skin input,body.skin select,body.skin .ltag{font-family:inherit}
@@ -290,6 +290,7 @@ body.skin #menu h3{font-size:14px}
 body.skin .cardRow button small{display:block;font-size:12px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.skin #end .btns,body.skin #dead .btns{padding:12px 0 14px;margin-bottom:0;box-shadow:0 -10px 12px -6px var(--paper);z-index:1}
 body.skin:has(#pause.on) #hud,body.skin:has(#keys.on) #hud{filter:blur(2px);opacity:.35}
+#menu.ov.on{overflow:hidden;align-items:center;padding:12px} #menu.ov.on>.panel.menuP{max-height:calc(100dvh - 24px);overflow-y:auto;margin:auto}
 /* d20 real-device fixes (iPhone Safari): grid tracks may shrink below their content so the menu never overflows the panel edge */
 .cardRow{grid-template-columns:repeat(3,minmax(0,1fr))} .cardRow.two{grid-template-columns:repeat(2,minmax(0,1fr))} .cardRow button{min-width:0}
 @media (max-width:900px){#menu .panel.menuP{grid-template-columns:minmax(0,1fr)} #menu .panel.menuP>*{min-width:0}}
